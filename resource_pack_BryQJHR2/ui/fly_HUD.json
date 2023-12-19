@@ -1,0 +1,256 @@
+{
+   "main" : {
+      "controls" : [
+         {
+            "flyMapPanel" : {
+               "controls" : [
+                  {
+                     "mapPanel@mini_map.mini_map_wrapper" : {
+                        "$enable_live_update" : true,
+                        "$face_icon_bg_color" : "white",
+                        "$face_icon_size" : [ 4, 4 ],
+                        "$live_update_interval" : 5,
+                        "$use_default_face_icon" : false,
+                        "anchor_from" : "top_right",
+                        "anchor_to" : "top_right",
+                        "offset" : [ 0, 0 ],
+                        "size" : [ 60, 60 ]
+                     }
+                  },
+                  {
+                     "map_cross" : {
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "layer" : 16,
+                        "size" : [ 55.0, 55.0 ],
+                        "texture" : "textures/ui/map_cross",
+                        "type" : "image"
+                     }
+                  },
+                  {
+                     "kuang" : {
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "layer" : 17,
+                        "size" : [ 65.0, 65.0 ],
+                        "texture" : "textures/ui/dialog_background_hollow_4_thin",
+                        "type" : "image"
+                     }
+                  },
+                  {
+                     "map_title" : {
+                        "controls" : [],
+                        "font_type" : "default",
+                        "layer" : 18,
+                        "offset" : [ 0.0, -34.0 ],
+                        "size" : [ 53.0, 11 ],
+                        "text" : "§l飞行地图",
+                        "text_alignment" : "center",
+                        "type" : "label"
+                     }
+                  },
+                  {
+                     "pos_label" : {
+                        "controls" : [],
+                        "font_size" : "small",
+                        "font_type" : "default",
+                        "layer" : 19,
+                        "offset" : [ 2.50, 34.0 ],
+                        "size" : [ 116.0, 11 ],
+                        "text" : "x: y: z:",
+                        "text_alignment" : "center",
+                        "type" : "label"
+                     }
+                  }
+               ],
+               "layer" : 1,
+               "offset" : [ -135.0, -48.0 ],
+               "size" : [ 60, 60 ],
+               "type" : "panel"
+            }
+         },
+         {
+            "attitude_angle_label" : {
+               "controls" : [],
+               "font_type" : "default",
+               "layer" : 21,
+               "offset" : [ 3.0, -92.50 ],
+               "size" : [ 185, 11 ],
+               "text" : "pitch:yaw:roll:",
+               "text_alignment" : "center",
+               "type" : "label"
+            }
+         },
+         {
+            "direction_label" : {
+               "controls" : [],
+               "font_type" : "default",
+               "layer" : 22,
+               "offset" : [ 3.0, -82.50 ],
+               "size" : [ 185, 11 ],
+               "text" : "方向",
+               "text_alignment" : "center",
+               "type" : "label"
+            }
+         },
+         {
+            "elytra_durability_panel" : {
+               "controls" : [
+                  {
+                     "durability_label" : {
+                        "controls" : [],
+                        "font_size" : "small",
+                        "font_type" : "default",
+                        "layer" : 1,
+                        "offset" : [ 33.50, -1.0 ],
+                        "size" : [ 22, 8 ],
+                        "text" : "?/?",
+                        "text_alignment" : "center",
+                        "type" : "label"
+                     }
+                  },
+                  {
+                     "durability_progress_bar" : {
+                        "$clip_direction" : "left",
+                        "$clip_ratio" : 0.0,
+                        "$is_new_nine_slice" : false,
+                        "$nine_slice_buttom" : 0,
+                        "$nine_slice_left" : 0,
+                        "$nine_slice_right" : 0,
+                        "$nine_slice_top" : 0,
+                        "$nineslice_size" : [ 0, 0, 0, 0 ],
+                        "$progress_bar_empty_texture" : "textures/ui/fly_empty_prograssbar",
+                        "$progress_bar_filled_texture" : "textures/ui/fly_full_prograssbar",
+                        "controls" : [
+                           {
+                              "empty_progress_bar@netease_editor_template_namespace.empty_progress_bar" : {}
+                           },
+                           {
+                              "filled_progress_bar@netease_editor_template_namespace.filled_progress_bar" : {
+                                 "color" : [ 0.0, 1.0, 0.0 ]
+                              }
+                           }
+                        ],
+                        "layer" : 2,
+                        "offset" : [ 3.50, -0.50 ],
+                        "size" : [ 39, 9 ],
+                        "type" : "panel"
+                     }
+                  },
+                  {
+                     "d_icon" : {
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "layer" : 5,
+                        "offset" : [ -31.0, 0.0 ],
+                        "size" : [ 16.0, 16.0 ],
+                        "texture" : "textures/ui/elytra",
+                        "type" : "image"
+                     }
+                  }
+               ],
+               "layer" : 23,
+               "offset" : [ -129.50, 19.0 ],
+               "size" : [ 86, 16 ],
+               "type" : "panel"
+            }
+         },
+         {
+            "speed_panel" : {
+               "controls" : [
+                  {
+                     "speed_label" : {
+                        "controls" : [],
+                        "font_size" : "small",
+                        "font_type" : "default",
+                        "layer" : 1,
+                        "offset" : [ 33.50, -1.0 ],
+                        "size" : [ 22, 8 ],
+                        "text" : "?",
+                        "text_alignment" : "center",
+                        "type" : "label"
+                     }
+                  },
+                  {
+                     "speed_progress_bar" : {
+                        "$clip_direction" : "left",
+                        "$clip_ratio" : 0.0,
+                        "$is_new_nine_slice" : false,
+                        "$nine_slice_buttom" : 0,
+                        "$nine_slice_left" : 0,
+                        "$nine_slice_right" : 0,
+                        "$nine_slice_top" : 0,
+                        "$nineslice_size" : [ 0, 0, 0, 0 ],
+                        "$progress_bar_empty_texture" : "textures/ui/fly_empty_prograssbar",
+                        "$progress_bar_filled_texture" : "textures/ui/fly_full_prograssbar",
+                        "controls" : [
+                           {
+                              "empty_progress_bar@netease_editor_template_namespace.empty_progress_bar" : {}
+                           },
+                           {
+                              "filled_progress_bar@netease_editor_template_namespace.filled_progress_bar" : {
+                                 "color" : [ 0.0, 0.6666666666666666, 1.0 ]
+                              }
+                           }
+                        ],
+                        "layer" : 2,
+                        "offset" : [ 3.50, -0.50 ],
+                        "size" : [ 39, 9 ],
+                        "type" : "panel"
+                     }
+                  },
+                  {
+                     "s_icon" : {
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "layer" : 5,
+                        "offset" : [ -31.0, 0.0 ],
+                        "size" : [ 16.0, 16.0 ],
+                        "texture" : "textures/ui/speed_icon",
+                        "type" : "image"
+                     }
+                  }
+               ],
+               "layer" : 29,
+               "offset" : [ -129.50, -2.0 ],
+               "size" : [ 86, 16 ],
+               "type" : "panel"
+            }
+         },
+         {
+            "HUD_panel" : {
+               "controls" : [
+                  {
+                     "roll_HUD" : {
+                        "alpha" : 0.60,
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "controls" : [],
+                        "layer" : 1,
+                        "size" : [ 150.0, 150.0 ],
+                        "texture" : "textures/ui/roll_HUD",
+                        "type" : "image"
+                     }
+                  },
+                  {
+                     "yaw_HUD" : {
+                        "alpha" : 0.60,
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "layer" : 2,
+                        "size" : [ 150.0, 150.0 ],
+                        "texture" : "textures/ui/yaw_HUD",
+                        "type" : "image"
+                     }
+                  }
+               ],
+               "layer" : 35,
+               "size" : [ 100, 100 ],
+               "type" : "panel"
+            }
+         }
+      ],
+      "type" : "screen"
+   },
+   "namespace" : "fly_HUD"
+}

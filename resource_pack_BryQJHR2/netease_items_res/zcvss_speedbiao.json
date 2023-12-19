@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:icon": "zcvss:speedbiao"
+        },
+        "description": {
+            "category": "Items",
+            "identifier": "zcvss:speedbiao",
+            "register_to_create_menu": true
+        }
+    }
+}

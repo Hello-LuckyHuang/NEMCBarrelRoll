@@ -1,0 +1,31 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "animations": {
+                "light": "animation.fo_light.light",
+                "move": "controller.animation.fo",
+                "nolight": "animation.fo_light.nolight",
+                "zhuan": "animation.fo_light.zhuan"
+            },
+            "geometry": {
+                "default": "geometry.fo_light"
+            },
+            "identifier": "tklyn:fo_light",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.default"
+            ],
+            "scripts": {
+                "animate": [
+                    "move"
+                ]
+            },
+            "textures": {
+                "default": "textures/entity/fo_light"
+            }
+        }
+    }
+}

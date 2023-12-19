@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:icon": "zcvss:Y_food"
+        },
+        "description": {
+            "category": "Items",
+            "identifier": "zcvss:Y_food",
+            "register_to_create_menu": true
+        }
+    }
+}

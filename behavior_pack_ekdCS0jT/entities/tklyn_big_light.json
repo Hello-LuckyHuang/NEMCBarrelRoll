@@ -1,0 +1,80 @@
+{
+    "format_version": "1.13.0",
+    "minecraft:entity": {
+        "component_groups": {
+            "light_end": {
+
+            }
+        },
+        "components": {
+            "minecraft:collision_box": {
+                "height": 1.975,
+                "width": 0.5
+            },
+            "minecraft:fire_immune": {
+
+            },
+            "minecraft:health": {
+                "max": 100,
+                "value": 100
+            },
+            "minecraft:hurt_on_condition": {
+                "damage_conditions": [
+                    {
+                        "cause": "lava",
+                        "damage_per_tick": 4,
+                        "filters": {
+                            "operator": "==",
+                            "subject": "self",
+                            "test": "in_lava",
+                            "value": true
+                        }
+                    }
+                ]
+            },
+            "minecraft:persistent": {
+
+            },
+            "minecraft:projectile": {
+                "gravity": 0.0,
+                "inertia": 0.0,
+                "offset": [
+                    0.0,
+                    0.5,
+                    0.0
+                ],
+                "power": 0.0
+            },
+            "minecraft:push_through": {
+
+            },
+            "minecraft:pushable": {
+                "is_pushable": false,
+                "is_pushable_by_piston": true
+            },
+            "minecraft:timer": {
+                "time": 0.4,
+                "time_down_event": {
+                    "event": "fz:light_end",
+                    "target": "self"
+                }
+            }
+        },
+        "description": {
+            "identifier": "tklyn:big_light",
+            "is_experimental": false,
+            "is_spawnable": false,
+            "is_summonable": false,
+            "runtime_identifier": "minecraft:lightning_bolt"
+        },
+        "events": {
+            "fz:light_end": {
+                "add": {
+                    "component_groups": [
+                        "light_end"
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "animations": {
+                "move": "animation.fly_yi.fly"
+            },
+            "geometry": {
+                "default": "geometry.fly_yi"
+            },
+            "identifier": "zcvss:fly_yi",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "render_controllers": [
+                "controller.render.default"
+            ],
+            "scripts": {
+                "animate": [
+                    "move"
+                ]
+            },
+            "textures": {
+                "default": "textures/entity/fly_yi"
+            }
+        }
+    }
+}

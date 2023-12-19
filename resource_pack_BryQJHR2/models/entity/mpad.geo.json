@@ -1,0 +1,47 @@
+{
+    "format_version": "1.12.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -9,
+                                0,
+                                -6
+                            ],
+                            "size": [
+                                16,
+                                1,
+                                12
+                            ],
+                            "uv": [
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "name": "bb_main",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.mpad",
+                "texture_height": 64,
+                "texture_width": 64,
+                "visible_bounds_height": 1.5,
+                "visible_bounds_offset": [
+                    0,
+                    0.25,
+                    0
+                ],
+                "visible_bounds_width": 3
+            }
+        }
+    ]
+}

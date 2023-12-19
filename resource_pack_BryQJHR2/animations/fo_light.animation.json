@@ -1,0 +1,50 @@
+{
+	"animations": {
+		"animation.fo_light.light": {
+			"animation_length": 2,
+			"bones": {
+				"light": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"2.0": [359, 0, 0]
+					},
+					"scale": {
+						"0.0": [0, 0, 0],
+						"0.25": [1.5, 1.5, 1.5]
+					}
+				},
+				"head": {
+					"scale": 0.5
+				}
+			}
+		},
+		"animation.fo_light.nolight": {
+			"loop": true,
+			"bones": {
+				"light": {
+					"scale": 0
+				},
+				"head": {
+					"scale": 0.5
+				}
+			}
+		},
+		"animation.fo_light.zhuan": {
+			"loop": true,
+			"animation_length": 2,
+			"bones": {
+				"head": {
+					"scale": 0.5
+				},
+				"light": {
+					"rotation": {
+						"0.0": [0, 0, 0],
+						"2.0": [359, 0, 0]
+					},
+					"scale": 1.5
+				}
+			}
+		}
+	},
+	"format_version": "1.8.0"
+}

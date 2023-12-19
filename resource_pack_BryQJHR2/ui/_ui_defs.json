@@ -1,0 +1,9 @@
+{
+    "ui_defs": [
+        "ui/barrelSetting.json",
+        "ui/barrelSwitch.json",
+        "ui/elytraShow.json",
+        "ui/fly_HUD.json",
+        "ui/netease_editor_template_namespace.json"
+    ]
+}

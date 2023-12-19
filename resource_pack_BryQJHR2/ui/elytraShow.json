@@ -1,0 +1,538 @@
+{
+   "main" : {
+      "controls" : [
+         {
+            "setting_title" : {
+               "controls" : [
+                  {
+                     "flyshow_setting_panel" : {
+                        "controls" : [
+                           {
+                              "image_bg" : {
+                                 "clip_direction" : "left",
+                                 "clip_ratio" : 0.0,
+                                 "controls" : [],
+                                 "layer" : 1,
+                                 "offset" : [ 3.0, -0.50 ],
+                                 "texture" : "textures/ui/effect_background",
+                                 "type" : "image"
+                              }
+                           },
+                           {
+                              "bs_title_label" : {
+                                 "font_type" : "default",
+                                 "layer" : 2,
+                                 "offset" : [ -98.0, -82.0 ],
+                                 "size" : [ 84, 10 ],
+                                 "text" : "飞行信息显示设置",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "angleshow_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 3,
+                                 "offset" : [ -93.50, -60.0 ],
+                                 "size" : [ 51, 11 ],
+                                 "text" : "显示姿态角",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "angle_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 4,
+                                 "offset" : [ -30.50, -60.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "HUDshow_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 68,
+                                 "offset" : [ -93.50, -30.0 ],
+                                 "size" : [ 51, 11 ],
+                                 "text" : "显示飞行HUD",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "HUD_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 69,
+                                 "offset" : [ -30.50, -30.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "naijiushow_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 133,
+                                 "offset" : [ -93.50, -0.0 ],
+                                 "size" : [ 51, 11 ],
+                                 "text" : "显示鞘翅耐久",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "elytra_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 134,
+                                 "offset" : [ -30.50, -0.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "speedshow_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 198,
+                                 "offset" : [ -93.50, 30.0 ],
+                                 "size" : [ 51, 11 ],
+                                 "text" : "显示飞行速度",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "speed_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 199,
+                                 "offset" : [ -30.50, 30.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "directionshow_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 263,
+                                 "offset" : [ 35.50, -60.0 ],
+                                 "size" : [ 51, 11 ],
+                                 "text" : "显示飞行方向",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "direction_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 264,
+                                 "offset" : [ 100.0, -60.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "mapshow_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 328,
+                                 "offset" : [ 35.50, -30.0 ],
+                                 "size" : [ 51, 11 ],
+                                 "text" : "显示飞行地图",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "map_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 329,
+                                 "offset" : [ 100.0, -30.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "HUD_switch_label" : {
+                                 "controls" : [],
+                                 "font_type" : "default",
+                                 "layer" : 393,
+                                 "offset" : [ -94.50, 66.0 ],
+                                 "size" : [ 67, 10 ],
+                                 "text" : "启用飞行信息显示",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "use_HUD_switch@common_toggles.switch_toggle_collection" : {
+                                 "$default_texture" : "textures/ui/toggle_off",
+                                 "$hover_texture" : "textures/ui/toggle_on",
+                                 "$pressed_no_hover_texture" : "textures/ui/toggle_on_hover",
+                                 "$pressed_texture" : "textures/ui/toggle_off_hover",
+                                 "$toggle_name" : "#netease_editor_template_namespace.toggle_name",
+                                 "$toggle_state_binding_name" : "#netease_editor_template_namespace.toggle_state",
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "layer" : 394,
+                                 "offset" : [ -40.0, 67.0 ],
+                                 "size" : [ 31, 21 ],
+                                 "type" : "panel"
+                              }
+                           },
+                           {
+                              "cancel_button@common.button" : {
+                                 "$control_alpha" : 1.0,
+                                 "$default_texture" : "textures/netease/common/button/default",
+                                 "$hover_texture" : "textures/netease/common/button/hover",
+                                 "$is_new_nine_slice" : false,
+                                 "$label_color" : [ 0.1294117647058824, 0.1294117647058824, 0.1294117647058824 ],
+                                 "$label_font_scale_factor" : 1.0,
+                                 "$label_font_size" : "normal",
+                                 "$label_layer" : 3,
+                                 "$label_offset" : [ 0, 0 ],
+                                 "$label_text" : "取消",
+                                 "$nine_slice_buttom" : 0,
+                                 "$nine_slice_left" : 0,
+                                 "$nine_slice_right" : 0,
+                                 "$nine_slice_top" : 0,
+                                 "$nineslice_size" : [ 0, 0, 0, 0 ],
+                                 "$pressed_button_name" : "%netease_editor_template_namespace.click",
+                                 "$pressed_texture" : "textures/netease/common/button/pressed",
+                                 "$texture_layer" : 2,
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "button_mappings" : [],
+                                 "controls" : [
+                                    {
+                                       "default@netease_editor_template_namespace.default" : {}
+                                    },
+                                    {
+                                       "hover@netease_editor_template_namespace.hover" : {}
+                                    },
+                                    {
+                                       "pressed@netease_editor_template_namespace.pressed" : {}
+                                    },
+                                    {
+                                       "button_label@netease_editor_template_namespace.button_label" : {}
+                                    }
+                                 ],
+                                 "default_control" : "default",
+                                 "hover_control" : "hover",
+                                 "is_handle_button_move_event" : true,
+                                 "layer" : 458,
+                                 "offset" : [ 94.50, 69.0 ],
+                                 "pressed_control" : "pressed",
+                                 "size" : [ 63, 24 ],
+                                 "type" : "button"
+                              }
+                           },
+                           {
+                              "save_button@common.button" : {
+                                 "$control_alpha" : 1.0,
+                                 "$default_texture" : "textures/netease/common/button/default",
+                                 "$hover_texture" : "textures/netease/common/button/hover",
+                                 "$is_new_nine_slice" : false,
+                                 "$label_color" : [ 0.1294117647058824, 0.1294117647058824, 0.1294117647058824 ],
+                                 "$label_font_scale_factor" : 1.0,
+                                 "$label_font_size" : "normal",
+                                 "$label_layer" : 3,
+                                 "$label_offset" : [ 0, 0 ],
+                                 "$label_text" : "保存并关闭",
+                                 "$nine_slice_buttom" : 0,
+                                 "$nine_slice_left" : 0,
+                                 "$nine_slice_right" : 0,
+                                 "$nine_slice_top" : 0,
+                                 "$nineslice_size" : [ 0, 0, 0, 0 ],
+                                 "$pressed_button_name" : "%netease_editor_template_namespace.click",
+                                 "$pressed_texture" : "textures/netease/common/button/pressed",
+                                 "$texture_layer" : 2,
+                                 "bindings" : [
+                                    {
+                                       "binding_collection_name" : "",
+                                       "binding_condition" : "always_when_visible",
+                                       "binding_type" : "collection_details"
+                                    }
+                                 ],
+                                 "button_mappings" : [],
+                                 "controls" : [
+                                    {
+                                       "default@netease_editor_template_namespace.default" : {}
+                                    },
+                                    {
+                                       "hover@netease_editor_template_namespace.hover" : {}
+                                    },
+                                    {
+                                       "pressed@netease_editor_template_namespace.pressed" : {}
+                                    },
+                                    {
+                                       "button_label@netease_editor_template_namespace.button_label" : {}
+                                    }
+                                 ],
+                                 "default_control" : "default",
+                                 "hover_control" : "hover",
+                                 "is_handle_button_move_event" : true,
+                                 "layer" : 468,
+                                 "offset" : [ 29.50, 69.0 ],
+                                 "pressed_control" : "pressed",
+                                 "size" : [ 63, 24 ],
+                                 "type" : "button"
+                              }
+                           }
+                        ],
+                        "layer" : 1,
+                        "offset" : [ -3.50, 104.50 ],
+                        "size" : [ 290.0, 183.0 ],
+                        "type" : "panel"
+                     }
+                  },
+                  {
+                     "image_bg" : {
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "controls" : [],
+                        "layer" : 479,
+                        "offset" : [ -1.0, 0.50 ],
+                        "texture" : "textures/ui/background_image",
+                        "type" : "image"
+                     }
+                  },
+                  {
+                     "close_button@common.button" : {
+                        "$control_alpha" : 1.0,
+                        "$default_texture" : "textures/ui/close_button_default",
+                        "$hover_texture" : "textures/ui/close_button_hover_light",
+                        "$is_new_nine_slice" : false,
+                        "$label_color" : [ 1, 1, 1 ],
+                        "$label_font_scale_factor" : 1.0,
+                        "$label_font_size" : "large",
+                        "$label_layer" : 3,
+                        "$label_offset" : [ 0, 0 ],
+                        "$label_text" : "Button",
+                        "$nine_slice_buttom" : 0,
+                        "$nine_slice_left" : 0,
+                        "$nine_slice_right" : 0,
+                        "$nine_slice_top" : 0,
+                        "$nineslice_size" : [ 0, 0, 0, 0 ],
+                        "$pressed_button_name" : "%netease_editor_template_namespace.click",
+                        "$pressed_texture" : "textures/ui/close_button_pressed_light",
+                        "$texture_layer" : 2,
+                        "anchor_from" : "right_middle",
+                        "bindings" : [
+                           {
+                              "binding_collection_name" : "",
+                              "binding_condition" : "always_when_visible",
+                              "binding_type" : "collection_details"
+                           }
+                        ],
+                        "button_mappings" : [],
+                        "controls" : [
+                           {
+                              "default@netease_editor_template_namespace.default" : {}
+                           },
+                           {
+                              "hover@netease_editor_template_namespace.hover" : {}
+                           },
+                           {
+                              "pressed@netease_editor_template_namespace.pressed" : {}
+                           }
+                        ],
+                        "default_control" : "default",
+                        "hover_control" : "hover",
+                        "is_handle_button_move_event" : true,
+                        "layer" : 480,
+                        "offset" : [ -14.0, 0.0 ],
+                        "pressed_control" : "pressed",
+                        "size" : [ 18, 18 ],
+                        "type" : "button"
+                     }
+                  },
+                  {
+                     "title" : {
+                        "anchor_from" : "left_middle",
+                        "anchor_to" : "left_middle",
+                        "color" : [ 0.1294117647058824, 0.1294117647058824, 0.1294117647058824 ],
+                        "font_type" : "default",
+                        "layer" : 487,
+                        "offset" : [ 14.0, 0.0 ],
+                        "size" : [ 92, "default" ],
+                        "text" : "BarrelRoll:翻滚飞行",
+                        "text_alignment" : "center",
+                        "type" : "label"
+                     }
+                  },
+                  {
+                     "icon_img" : {
+                        "clip_direction" : "left",
+                        "clip_ratio" : 0.0,
+                        "layer" : 488,
+                        "offset" : [ -134.0, 0.50 ],
+                        "size" : [ 18.0, 18.0 ],
+                        "texture" : "textures/ui/icon",
+                        "type" : "image"
+                     }
+                  },
+                  {
+                     "to_barrel_button@common.button" : {
+                        "$control_alpha" : 1.0,
+                        "$default_texture" : "textures/netease/common/button/default",
+                        "$hover_texture" : "textures/netease/common/button/hover",
+                        "$is_new_nine_slice" : true,
+                        "$label_color" : [ 0.3333333333333333, 0.3333333333333333, 0.3333333333333333 ],
+                        "$label_font_scale_factor" : 1.0,
+                        "$label_font_size" : "normal",
+                        "$label_layer" : 3,
+                        "$label_offset" : [ 0, 0 ],
+                        "$label_text" : "翻滚飞行设置 ",
+                        "$nine_slice_buttom" : 0,
+                        "$nine_slice_left" : 0,
+                        "$nine_slice_right" : 0,
+                        "$nine_slice_top" : 0,
+                        "$nineslice_size" : [ 0, 0, 0, 0 ],
+                        "$pressed_button_name" : "%netease_editor_template_namespace.click",
+                        "$pressed_texture" : "textures/netease/common/button/pressed",
+                        "$texture_layer" : 2,
+                        "bindings" : [
+                           {
+                              "binding_collection_name" : "",
+                              "binding_condition" : "always_when_visible",
+                              "binding_type" : "collection_details"
+                           }
+                        ],
+                        "button_mappings" : [],
+                        "controls" : [
+                           {
+                              "default@netease_editor_template_namespace.default" : {}
+                           },
+                           {
+                              "hover@netease_editor_template_namespace.hover" : {}
+                           },
+                           {
+                              "pressed@netease_editor_template_namespace.pressed" : {}
+                           },
+                           {
+                              "button_label@netease_editor_template_namespace.button_label" : {
+                                 "anchor_from" : "right_middle",
+                                 "anchor_to" : "right_middle"
+                              }
+                           },
+                           {
+                              "icon_image" : {
+                                 "clip_direction" : "left",
+                                 "clip_ratio" : 0.0,
+                                 "layer" : 10,
+                                 "offset" : [ -26.50, 0.0 ],
+                                 "size" : [ 15, 15.0 ],
+                                 "texture" : "textures/ui/barrelfly_setting_icon",
+                                 "type" : "image"
+                              }
+                           }
+                        ],
+                        "default_control" : "default",
+                        "hover_control" : "hover",
+                        "is_handle_button_move_event" : true,
+                        "layer" : 489,
+                        "offset" : [ 49.0, 0.0 ],
+                        "pressed_control" : "pressed",
+                        "size" : [ 77, 19 ],
+                        "type" : "button"
+                     }
+                  }
+               ],
+               "layer" : 1,
+               "offset" : [ 3.0, -94.0 ],
+               "size" : [ 292.0, 25 ],
+               "type" : "panel"
+            }
+         }
+      ],
+      "render_game_behind" : false,
+      "type" : "screen"
+   },
+   "namespace" : "elytraShow"
+}

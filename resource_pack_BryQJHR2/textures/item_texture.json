@@ -1,0 +1,21 @@
+{
+    "resource_pack_name": "vanilla",
+    "texture_data": {
+        "zcvss:Y_food": {
+            "textures": "textures/items/YOvertrun_icon"
+        },
+        "zcvss:barrel_item": {
+            "textures": "textures/items/icon"
+        },
+        "zcvss:fly_yi": {
+            "textures": "textures/items/strength_icon"
+        },
+        "zcvss:mpad": {
+            "textures": "textures/items/linmin_icon"
+        },
+        "zcvss:speedbiao": {
+            "textures": "textures/items/speed_icon"
+        }
+    },
+    "texture_name": "atlas.items"
+}

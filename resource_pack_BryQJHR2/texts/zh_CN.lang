@@ -1,0 +1,9 @@
+item.zcvss:speedbiao.name=速度计(可食用)
+item.zcvss:Y_food.name=神秘的Y，可以吃吗？
+item.zcvss:mpad.name=mPad，科技的力量，板王的眷顾
+item.zcvss:fly_yi.name=很好的翅膀，使我的翅膀旋转
+entity.zcvss:mpad.name=板王的板
+item.spawn_egg.entity.zcvss:mpad.name=minecraft:arrow_spawn_egg
+entity.zcvss:fly_yi.name=旋转的翼
+item.spawn_egg.entity.zcvss:fly_yi.name=minecraft:arrow_spawn_egg
+item.zcvss:barrel_item.name=组件装饰挂件(你可以把它裱起来)

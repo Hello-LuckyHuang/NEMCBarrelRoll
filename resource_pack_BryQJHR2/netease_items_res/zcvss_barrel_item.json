@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:icon": "zcvss:barrel_item"
+        },
+        "description": {
+            "category": "Items",
+            "identifier": "zcvss:barrel_item",
+            "register_to_create_menu": true
+        }
+    }
+}

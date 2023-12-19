@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:client_entity": {
+        "description": {
+            "animations": {
+                "lighting": "animation.big_light.fashe"
+            },
+            "geometry": {
+                "default": "geometry.big_light"
+            },
+            "identifier": "tklyn:big_light",
+            "materials": {
+                "default": "entity_emissive"
+            },
+            "render_controllers": [
+                "controller.render.default"
+            ],
+            "scripts": {
+                "animate": [
+                    "lighting"
+                ]
+            },
+            "textures": {
+                "default": "textures/entity/big_light"
+            }
+        }
+    }
+}

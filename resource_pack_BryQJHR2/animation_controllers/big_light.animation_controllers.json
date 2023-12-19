@@ -1,0 +1,37 @@
+{
+    "animation_controllers": {
+        "controller.animation.big_light.editor": {
+            "initial_state": "default",
+            "states": {
+                "default": {
+                    "transitions": [
+                        {
+                            "s_1": "query.mod.editor_ani_choose == 1.0 && variable.editor_ani_jump_ctrl"
+                        }
+                    ]
+                },
+                "s_1": {
+                    "animations": [
+                        "animation.big_light.fashe"
+                    ],
+                    "transitions": [
+                        {
+                            "default": "variable.editor_ani_jump_ctrl = 0.0 ;return (query.all_animations_finished && !query.mod.editor_ani_is_loop) || query.mod.editor_ani_choose == 0.0;"
+                        },
+                        {
+                            "s_1": "query.mod.editor_ani_choose == 1.0&& query.all_animations_finished && query.mod.editor_ani_is_loop"
+                        }
+                    ]
+                },
+                "version_for_editor": {
+                    "transitions": [
+                        {
+                            "default": "1.0"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "format_version": "1.10.0"
+}

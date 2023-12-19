@@ -1,0 +1,127 @@
+{
+    "format_version": "1.12.0",
+    "minecraft:geometry": [
+        {
+            "bones": [
+                {
+                    "cubes": [
+                        {
+                            "origin": [
+                                -11,
+                                0,
+                                -3
+                            ],
+                            "size": [
+                                22,
+                                1,
+                                6
+                            ],
+                            "uv": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -9,
+                                0,
+                                3
+                            ],
+                            "size": [
+                                18,
+                                1,
+                                1
+                            ],
+                            "uv": [
+                                0,
+                                7
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -10,
+                                0,
+                                -4
+                            ],
+                            "size": [
+                                9,
+                                1,
+                                1
+                            ],
+                            "uv": [
+                                0,
+                                11
+                            ]
+                        },
+                        {
+                            "origin": [
+                                1,
+                                0,
+                                -4
+                            ],
+                            "size": [
+                                9,
+                                1,
+                                1
+                            ],
+                            "uv": [
+                                0,
+                                9
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -1,
+                                1,
+                                -6
+                            ],
+                            "size": [
+                                0,
+                                2,
+                                4
+                            ],
+                            "uv": [
+                                0,
+                                9
+                            ]
+                        },
+                        {
+                            "origin": [
+                                1,
+                                1,
+                                -6
+                            ],
+                            "size": [
+                                0,
+                                2,
+                                4
+                            ],
+                            "uv": [
+                                0,
+                                9
+                            ]
+                        }
+                    ],
+                    "name": "myyi",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "description": {
+                "identifier": "geometry.fly_yi",
+                "texture_height": 64,
+                "texture_width": 64,
+                "visible_bounds_height": 1.5,
+                "visible_bounds_offset": [
+                    0,
+                    0.25,
+                    0
+                ],
+                "visible_bounds_width": 3
+            }
+        }
+    ]
+}

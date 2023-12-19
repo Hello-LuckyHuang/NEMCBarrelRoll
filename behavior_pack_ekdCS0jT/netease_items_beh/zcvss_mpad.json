@@ -1,0 +1,24 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:max_damage": 12000,
+            "minecraft:use_duration": 10.0,
+            "netease:fire_resistant": {
+                "value": true
+            },
+            "netease:weapon": {
+                "enchantment": 0,
+                "level": 3,
+                "speed": 5,
+                "type": "sword"
+            }
+        },
+        "description": {
+            "category": "Equipment",
+            "custom_item_type": "ranged_weapon",
+            "identifier": "zcvss:mpad",
+            "register_to_create_menu": false
+        }
+    }
+}

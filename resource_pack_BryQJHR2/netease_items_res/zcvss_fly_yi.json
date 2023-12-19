@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:icon": "zcvss:fly_yi"
+        },
+        "description": {
+            "category": "Items",
+            "identifier": "zcvss:fly_yi",
+            "register_to_create_menu": true
+        }
+    }
+}

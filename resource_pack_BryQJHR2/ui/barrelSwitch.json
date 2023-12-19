@@ -1,0 +1,192 @@
+{
+   "main" : {
+      "controls" : [
+         {
+            "SwitchPanel" : {
+               "button_mappings" : [
+                  {
+                     "from_button_id" : "button.menu_select",
+                     "mapping_type" : "pressed",
+                     "to_button_id" : "#netease_to_button_id"
+                  }
+               ],
+               "controls" : [
+                  {
+                     "barrelSwitchButton@common.button" : {
+                        "$control_alpha" : 0.50,
+                        "$default_texture" : "textures/netease/common/button/default",
+                        "$hover_texture" : "textures/netease/common/button/hover",
+                        "$is_new_nine_slice" : true,
+                        "$label_color" : [ 1, 1, 1 ],
+                        "$label_font_scale_factor" : 1.0,
+                        "$label_font_size" : "normal",
+                        "$label_layer" : 3,
+                        "$label_offset" : [ 0, 0 ],
+                        "$label_text" : "on",
+                        "$nine_slice_buttom" : 0,
+                        "$nine_slice_left" : 0,
+                        "$nine_slice_right" : 0,
+                        "$nine_slice_top" : 0,
+                        "$nineslice_size" : [ 0, 0, 0, 0 ],
+                        "$pressed_button_name" : "%netease_editor_template_namespace.click",
+                        "$pressed_texture" : "textures/netease/common/button/pressed",
+                        "$texture_layer" : 2,
+                        "bindings" : [
+                           {
+                              "binding_collection_name" : "",
+                              "binding_condition" : "always_when_visible",
+                              "binding_type" : "collection_details"
+                           }
+                        ],
+                        "button_mappings" : [],
+                        "controls" : [
+                           {
+                              "default@netease_editor_template_namespace.default" : {}
+                           },
+                           {
+                              "hover@netease_editor_template_namespace.hover" : {}
+                           },
+                           {
+                              "pressed@netease_editor_template_namespace.pressed" : {}
+                           },
+                           {
+                              "switch_label" : {
+                                 "anchor_from" : "right_middle",
+                                 "anchor_to" : "right_middle",
+                                 "color" : [ 0.0, 0.5882352941176471, 0.0 ],
+                                 "font_type" : "default",
+                                 "layer" : 7,
+                                 "offset" : [ -0.50, 0.0 ],
+                                 "size" : [ 19, 12 ],
+                                 "text" : "on",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "icon" : {
+                                 "alpha" : 0.50,
+                                 "clip_direction" : "left",
+                                 "clip_ratio" : 0.0,
+                                 "layer" : 8,
+                                 "offset" : [ -7.0, -0.50 ],
+                                 "size" : [ 12, 12.0 ],
+                                 "texture" : "textures/ui/barrel_icon",
+                                 "type" : "image"
+                              }
+                           }
+                        ],
+                        "default_control" : "default",
+                        "hover_control" : "hover",
+                        "is_handle_button_move_event" : true,
+                        "pressed_control" : "pressed",
+                        "size" : [ 39, 17.0 ],
+                        "type" : "button"
+                     }
+                  }
+               ],
+               "draggable" : "both",
+               "is_swallow" : true,
+               "layer" : 19,
+               "offset" : [ 155.0, -3.0 ],
+               "size" : [ 50.0, 30.0 ],
+               "type" : "input_panel"
+            }
+         },
+         {
+            "SettingPanel" : {
+               "button_mappings" : [
+                  {
+                     "from_button_id" : "button.menu_select",
+                     "mapping_type" : "pressed",
+                     "to_button_id" : "#netease_to_button_id"
+                  }
+               ],
+               "controls" : [
+                  {
+                     "barrelSettingButton@common.button" : {
+                        "$control_alpha" : 0.50,
+                        "$default_texture" : "textures/netease/common/button/default",
+                        "$hover_texture" : "textures/netease/common/button/hover",
+                        "$is_new_nine_slice" : true,
+                        "$label_color" : [ 1, 1, 1 ],
+                        "$label_font_scale_factor" : 1.0,
+                        "$label_font_size" : "normal",
+                        "$label_layer" : 3,
+                        "$label_offset" : [ 0, 0 ],
+                        "$label_text" : "on",
+                        "$nine_slice_buttom" : 0,
+                        "$nine_slice_left" : 0,
+                        "$nine_slice_right" : 0,
+                        "$nine_slice_top" : 0,
+                        "$nineslice_size" : [ 0, 0, 0, 0 ],
+                        "$pressed_button_name" : "%netease_editor_template_namespace.click",
+                        "$pressed_texture" : "textures/netease/common/button/pressed",
+                        "$texture_layer" : 2,
+                        "bindings" : [
+                           {
+                              "binding_collection_name" : "",
+                              "binding_condition" : "always_when_visible",
+                              "binding_type" : "collection_details"
+                           }
+                        ],
+                        "button_mappings" : [],
+                        "controls" : [
+                           {
+                              "default@netease_editor_template_namespace.default" : {}
+                           },
+                           {
+                              "hover@netease_editor_template_namespace.hover" : {}
+                           },
+                           {
+                              "pressed@netease_editor_template_namespace.pressed" : {}
+                           },
+                           {
+                              "switch_label" : {
+                                 "anchor_from" : "right_middle",
+                                 "anchor_to" : "right_middle",
+                                 "color" : [ 0.7490196078431373, 0.7176470588235294, 0.7333333333333333 ],
+                                 "font_type" : "default",
+                                 "layer" : 4,
+                                 "offset" : [ -1.50, 0.0 ],
+                                 "size" : [ 19, 12 ],
+                                 "text" : "设置",
+                                 "text_alignment" : "center",
+                                 "type" : "label"
+                              }
+                           },
+                           {
+                              "icon" : {
+                                 "alpha" : 0.50,
+                                 "clip_direction" : "left",
+                                 "clip_ratio" : 0.0,
+                                 "layer" : 5,
+                                 "offset" : [ -7.0, -0.50 ],
+                                 "size" : [ 12, 12.0 ],
+                                 "texture" : "textures/ui/set_icon",
+                                 "type" : "image"
+                              }
+                           }
+                        ],
+                        "default_control" : "default",
+                        "hover_control" : "hover",
+                        "is_handle_button_move_event" : true,
+                        "pressed_control" : "pressed",
+                        "size" : [ 39, 17.0 ],
+                        "type" : "button"
+                     }
+                  }
+               ],
+               "draggable" : "both",
+               "is_swallow" : true,
+               "layer" : 29,
+               "offset" : [ 155.0, -32.0 ],
+               "size" : [ 50.0, 30.0 ],
+               "type" : "input_panel"
+            }
+         }
+      ],
+      "type" : "screen"
+   },
+   "namespace" : "barrelSwitch"
+}

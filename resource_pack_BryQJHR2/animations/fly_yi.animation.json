@@ -1,0 +1,25 @@
+{
+    "animations": {
+        "animation.fly_yi.fly": {
+            "animation_length": 0.25,
+            "bones": {
+                "myyi": {
+                    "rotation": {
+                        "0.0": [
+                            0,
+                            0,
+                            0
+                        ],
+                        "0.25": [
+                            0,
+                            0,
+                            360
+                        ]
+                    }
+                }
+            },
+            "loop": true
+        }
+    },
+    "format_version": "1.8.0"
+}

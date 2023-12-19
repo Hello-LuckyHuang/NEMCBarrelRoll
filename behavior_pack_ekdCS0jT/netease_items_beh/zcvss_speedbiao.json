@@ -1,0 +1,26 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:food": {
+                "can_always_eat": true,
+                "effects": [
+                    {
+                        "amplifier": 10,
+                        "chance": 1.0,
+                        "duration": 5,
+                        "name": "speed"
+                    }
+                ],
+                "nutrition": 5,
+                "saturation_modifier": "normal"
+            },
+            "minecraft:use_duration": 20.0
+        },
+        "description": {
+            "category": "Items",
+            "identifier": "zcvss:speedbiao",
+            "register_to_create_menu": false
+        }
+    }
+}

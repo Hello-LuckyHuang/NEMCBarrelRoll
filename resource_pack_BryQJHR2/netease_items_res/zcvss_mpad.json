@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "components": {
+            "minecraft:icon": "zcvss:mpad"
+        },
+        "description": {
+            "category": "Equipment",
+            "identifier": "zcvss:mpad",
+            "register_to_create_menu": true
+        }
+    }
+}
