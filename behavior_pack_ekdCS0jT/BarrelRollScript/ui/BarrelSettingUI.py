@@ -20,6 +20,7 @@ class Main(ScreenNode):
 		self.cancelButton = "/setting_title/barrel_setting_panel/cancel_button"
 		self.huanButton = "/setting_title/barrel_setting_panel/huanyuan_button"
 		self.flySettingButton = "/setting_title/to_elytra_button"
+		self.lisenceButton = "/setting_title/lisence_button"
 
 	def Create(self):
 		self.closeButtonItem = self.GetBaseUIControl(self.closeButton).asButton()
@@ -33,18 +34,21 @@ class Main(ScreenNode):
 		self.cancelButtonItem = self.GetBaseUIControl(self.cancelButton).asButton()
 		self.huanButtonItem = self.GetBaseUIControl(self.huanButton).asButton()
 		self.flySettingButtonItem = self.GetBaseUIControl(self.flySettingButton).asButton()
+		self.lisenceButton = self.GetBaseUIControl(self.lisenceButton).asButton()
 
 		self.closeButtonItem.AddTouchEventParams({"isSwallow": True})
 		self.saveButtonItem.AddTouchEventParams({"isSwallow": True})
 		self.cancelButtonItem.AddTouchEventParams({"isSwallow": True})
 		self.huanButtonItem.AddTouchEventParams({"isSwallow": True})
 		self.flySettingButtonItem.AddTouchEventParams({"isSwallow": True})
+		self.lisenceButton.AddTouchEventParams({"isSwallow": True})
 
 		self.closeButtonItem.SetButtonTouchUpCallback(self.closeSettingPanel)#按钮按下时触发
 		self.saveButtonItem.SetButtonTouchUpCallback(self.saveSetting)#按钮按下时触发
 		self.cancelButtonItem.SetButtonTouchUpCallback(self.closeSettingPanel)#按钮按下时触发
 		self.huanButtonItem.SetButtonTouchUpCallback(self.reset)#按钮按下时触发
 		self.flySettingButtonItem.SetButtonTouchUpCallback(self.openFlySetting)#按钮按下时触发
+		self.lisenceButton.SetButtonTouchUpCallback(self.showlisence)#按钮按下时触发
 
 
 		self.linminSliderValue = (self.client_sys.linminValue - 1.0) / (2.5 - 1.0)
@@ -96,6 +100,12 @@ class Main(ScreenNode):
 
 	def openFlySetting(self, event):
 		self.client_sys.flySettingPanel = clientApi.CreateUI('BarrelUI', 'flyshowsetting',{"isHud" : 0, "client" : self.client_sys})
+		self.client_sys.settingPanel.SetRemove()
+
+	def showlisence(self, event):
+		comp = clientApi.GetEngineCompFactory().CreateTextNotifyClient(clientApi.GetLevelId())
+		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"终极翻滚+飞行信息显示组件使用GPL 3.0许可开源")
+		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"组件开源地址:https://github.com/HXzhitang/netease-MC-addon-Barrel-Roll")
 		self.client_sys.settingPanel.SetRemove()
 
 	@ViewBinder.binding(ViewBinder.BF_SliderChanged | ViewBinder.BF_SliderFinished)

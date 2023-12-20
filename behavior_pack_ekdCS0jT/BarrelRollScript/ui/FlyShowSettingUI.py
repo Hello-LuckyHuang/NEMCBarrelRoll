@@ -22,6 +22,7 @@ class Main(ScreenNode):
 		self.directionToggle = "/setting_title/flyshow_setting_panel/direction_switch"
 		self.mapToggle = "/setting_title/flyshow_setting_panel/map_switch"
 		self.HUDScreenToggle = "/setting_title/flyshow_setting_panel/use_HUD_switch"
+		self.lisenceButton = "/setting_title/lisence_button"
 		
 
 	def Create(self):
@@ -29,6 +30,7 @@ class Main(ScreenNode):
 		self.saveButtonItem = self.GetBaseUIControl(self.saveButton).asButton()
 		self.barrelSettingButtonItem = self.GetBaseUIControl(self.barrelSettingButton).asButton()
 		self.cancelButtonItem = self.GetBaseUIControl(self.cancelButton).asButton()
+		self.lisenceButton = self.GetBaseUIControl(self.lisenceButton).asButton()
 
 		self.angleToggleItem = self.GetBaseUIControl(self.angleToggle).asSwitchToggle()
 		self.HUDToggleItem = self.GetBaseUIControl(self.HUDToggle).asSwitchToggle()
@@ -42,11 +44,13 @@ class Main(ScreenNode):
 		self.barrelSettingButtonItem.AddTouchEventParams({"isSwallow": True})
 		self.cancelButtonItem.AddTouchEventParams({"isSwallow": True})
 		self.saveButtonItem.AddTouchEventParams({"isSwallow": True})
+		self.lisenceButton.AddTouchEventParams({"isSwallow": True})
 
 		self.closeButtonItem.SetButtonTouchUpCallback(self.closeSettingPanel)#按钮按下时触发
 		self.barrelSettingButtonItem.SetButtonTouchUpCallback(self.openFlySetting)#按钮按下时触发
 		self.saveButtonItem.SetButtonTouchUpCallback(self.saveSetting)#按钮按下时触发
 		self.cancelButtonItem.SetButtonTouchUpCallback(self.closeSettingPanel)#按钮按下时触发
+		self.lisenceButton.SetButtonTouchUpCallback(self.showlisence)#按钮按下时触发
 
 		self.angleToggleItem.SetToggleState(self.client_sys.angleshow)
 		self.HUDToggleItem.SetToggleState(self.client_sys.flyHUDshow)
@@ -83,3 +87,9 @@ class Main(ScreenNode):
 
 	def OnDeactive(self):
 		pass
+
+	def showlisence(self, event):
+		comp = clientApi.GetEngineCompFactory().CreateTextNotifyClient(clientApi.GetLevelId())
+		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"终极翻滚+飞行信息显示组件使用GPL 3.0许可开源")
+		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"组件开源地址:https://github.com/HXzhitang/netease-MC-addon-Barrel-Roll")
+		self.client_sys.flySettingPanel.SetRemove()
