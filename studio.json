@@ -30,7 +30,7 @@
     "GameType": 1,
     "Id": "642ba5f7d7214681b76d8a127425b018",
     "IsMap": false,
-    "NewEditCount": 36,
+    "NewEditCount": 38,
     "OldComponents": [
 
     ],
@@ -45,7 +45,7 @@
     "ShowGpuDriverTips": false,
     "ShowGuide": false,
     "Source": "空白附加包",
-    "StudioPort": 10539,
+    "StudioPort": 12154,
     "StudioTempPath": "D:\\MCStudioDownload\\temp\\editorTemp",
     "UserId": "122625",
     "UserName": "HLH工作站",
