@@ -63,6 +63,7 @@ class Main(ScreenNode):
 		pop_comp = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId())
 		if self.client_sys.barrelflySwitch == True:
 			self.client_sys.barrelflySwitch = False
+			self.client_sys.resetFlight()
 			self.SwitchLabelItem.SetText("off")
 			self.SwitchLabelItem.SetTextColor((150, 0, 0))
 			pop_comp.SetTipMessage("翻滚飞行："+clientApi.GenerateColor("RED") + "关闭")
@@ -73,5 +74,5 @@ class Main(ScreenNode):
 			pop_comp.SetTipMessage("翻滚飞行："+clientApi.GenerateColor("GREEN") + "开启")
 
 	def openSettingPanel(self, event):
-		self.client_sys.settingPanel = clientApi.CreateUI('BarrelUI', 'barrelsetting',{"isHud" : 0, "client" : self.client_sys})
+		self.client_sys.openSettingPanel(event)
 

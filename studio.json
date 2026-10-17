@@ -1,53 +1,49 @@
 {
-    "Account": "hello_luckyhuang@163.com",
-    "AssertCacheDir": "D:\\MCStudioDownload\\EngineAssert",
-    "BlockNums": [
-        0,
-        0
-    ],
-    "BornPoint": [
-        0,
-        0,
-        0
-    ],
-    "CanPublishResourceComponent": true,
-    "CodeEnable": false,
-    "CreateNew": true,
-    "CreateVersion": "2.9.0.514461",
-    "DCWebUrl": "https://x19apigatewayexpr.nie.netease.com",
-    "EditAddOnPaths": [
-
-    ],
-    "EditLogFilePath": "D:\\MCStudioDownload\\work\\editor\\edit.log",
-    "EditMaterialPaths": [
-
-    ],
-    "EditName": "滚筒飞行",
-    "EditType": 2,
-    "EditVersion": "2.9.0.514461",
-    "EditorResourcePackPath": "D:\\Program Files (x86)\\Netease\\MCStudio\\data\\inner_res",
-    "ElkUrl": "https://x19mclexpr.nie.netease.com/client-log",
-    "GameType": 1,
-    "Id": "642ba5f7d7214681b76d8a127425b018",
-    "IsMap": false,
-    "NewEditCount": 38,
-    "OldComponents": [
-
-    ],
-    "OldEditCount": 0,
-    "ResourceIds": [
-
-    ],
-    "SaveBackAddOnPath": "D:\\MCStudioDownload\\work\\hello_luckyhuang@163.com\\Cpp\\AddOn\\642ba5f7d7214681b76d8a127425b018",
-    "SaveBackMapPath": "",
-    "Seed": "",
-    "ServerName": "EXPR",
-    "ShowGpuDriverTips": false,
-    "ShowGuide": false,
-    "Source": "空白附加包",
-    "StudioPort": 12154,
-    "StudioTempPath": "D:\\MCStudioDownload\\temp\\editorTemp",
-    "UserId": "122625",
-    "UserName": "HLH工作站",
-    "WorldType": 1
+  "Source": "空白附加包",
+  "CreateVersion": "2.9.0.514461",
+  "EditVersion": "3.1.0.863187",
+  "OldEditCount": 0,
+  "NewEditCount": 43,
+  "OldComponents": [],
+  "Account": "",
+  "UserName": "",
+  "UserId": "",
+  "Id": "642ba5f7d7214681b76d8a127425b018",
+  "EditType": 4,
+  "IsMap": false,
+  "CreateNew": true,
+  "CodeEnable": false,
+  "CanPublishResourceComponent": true,
+  "EditName": "滚筒飞行",
+  "GameType": 1,
+  "WorldType": 1,
+  "Seed": "",
+  "BlockNums": [
+    0,
+    0
+  ],
+  "BornPoint": [
+    0,
+    0,
+    0
+  ],
+  "SaveBackMapPath": "",
+  "SaveBackAddOnPath": "",
+  "ResourceIds": [],
+  "EditAddOnPaths": [],
+  "NameSpace": null,
+  "EditMaterialPaths": [],
+  "EditLogFilePath": "",
+  "ServerName": "EXPR",
+  "StudioPort": 10059,
+  "DCWebUrl": "https://x19apigatewayexpr.nie.netease.com",
+  "ShowGuide": false,
+  "AssertCacheDir": "",
+  "ElkUrl": "",
+  "ShowGpuDriverTips": false,
+  "StudioTempPath": "",
+  "EditorResourcePackPath": "",
+  "EditDate": 1735360681,
+  "EditDuration": 12091,
+  "TestDuration": 5907
 }

@@ -9,6 +9,7 @@ class Main(ScreenNode):
 	def __init__(self, namespace, name, param):
 		ScreenNode.__init__(self, namespace, name, param)
 		self.client_sys = param['client']#获取客户端
+		self._closing = False
 
 		self.closeButton = "/setting_title/close_button"#为UI json文件中的路径关系
 		self.barrelSettingButton = "/setting_title/to_barrel_button"
@@ -61,13 +62,18 @@ class Main(ScreenNode):
 		self.HUDScreenToggleItem.SetToggleState(self.client_sys.HUDScreen)
 
 	def closeSettingPanel(self, event):
-		self.client_sys.flySettingPanel.SetRemove()
+		if self._closing:
+			return
+		self._closing = True
+		self.SetRemove()
 	
 	def openFlySetting(self, event):
-		self.client_sys.settingPanel = clientApi.CreateUI('BarrelUI', 'barrelsetting',{"isHud" : 0, "client" : self.client_sys})
-		self.client_sys.flySettingPanel.SetRemove()
+		if not self._closing:
+			self.client_sys.openSettingPanel(event, source=self)
 
 	def saveSetting(self, event):
+		if self._closing:
+			return
 		self.client_sys.angleshow = self.angleToggleItem.GetToggleState()
 		self.client_sys.flyHUDshow = self.HUDToggleItem.GetToggleState()
 		self.client_sys.elytradurabilityshow = self.durabilityToggleItem.GetToggleState()
@@ -76,11 +82,14 @@ class Main(ScreenNode):
 		self.client_sys.mapshow = self.mapToggleItem.GetToggleState()
 		self.client_sys.HUDScreen = self.HUDScreenToggleItem.GetToggleState()
 		self.client_sys.saveflyHUDConfig()
-		self.client_sys.flyHUDPanel.fleshHUDShow()
-		self.client_sys.flySettingPanel.SetRemove()
+		if self.client_sys.flyHUDPanel is not None:
+			self.client_sys.flyHUDPanel.fleshHUDShow()
+		self.closeSettingPanel(event)
 
 	def Destroy(self):
-		pass
+		self._closing = True
+		if self.client_sys.flySettingPanel is self:
+			self.client_sys.flySettingPanel = None
 
 	def OnActive(self):
 		pass
@@ -92,4 +101,4 @@ class Main(ScreenNode):
 		comp = clientApi.GetEngineCompFactory().CreateTextNotifyClient(clientApi.GetLevelId())
 		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"终极翻滚+飞行信息显示组件使用GPL 3.0许可开源")
 		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"组件开源地址:https://github.com/HXzhitang/netease-MC-addon-Barrel-Roll")
-		self.client_sys.flySettingPanel.SetRemove()
+		self.closeSettingPanel(event)

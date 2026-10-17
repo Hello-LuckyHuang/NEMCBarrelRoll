@@ -73,22 +73,19 @@
                     "/main/setting_title/barrel_setting_panel/image_bg",
                     "/main/setting_title/barrel_setting_panel/linmin_icon_image",
                     "/main/setting_title/barrel_setting_panel/strength_icon_image",
+                    "/main/setting_title/barrel_setting_panel/YOverturn_icon_image",
                     "/main/setting_title/barrel_setting_panel/linmin_slider/slider_bar_default/sizing_panel",
                     "/main/setting_title/barrel_setting_panel/linmin_num",
                     "/main/setting_title/barrel_setting_panel/streng_num",
                     "/main/setting_title/barrel_setting_panel/Y_overturn_label",
                     "/main/setting_title/barrel_setting_panel/Y_overturn_switch_toggle/this_toggle",
                     "/main/setting_title/barrel_setting_panel/Y_overturn_switch_toggle/this_toggle/unchecked",
-                    "/main/setting_title/barrel_setting_panel/Y_overturn_switch_toggle/this_toggle/unchecked/button_content",
-                    "/main/setting_title/barrel_setting_panel/Y_overturn_switch_toggle/this_toggle/unchecked/button_content/common_buttons.button_content_panel",
-                    "/main/setting_title/barrel_setting_panel/Y_overturn_switch_toggle/this_toggle/unchecked/button_content/common_buttons.button_content_panel/content",
-                    "/main/setting_title/image_bg",
-                    "/main/setting_title/lisence_button"
+                    "/main/setting_title/barrel_setting_panel/Y_overturn_num",
+                    "/main/setting_title/barrel_setting_panel/gyroSensor_label",
+                    "/main/setting_title/image_bg"
                 ],
                 "D:\\MCStudioDownload\\work\\hello_luckyhuang@163.com\\Cpp\\AddOn\\642ba5f7d7214681b76d8a127425b018\\resource_pack_BryQJHR2\\ui\\barrelSwitch.json": [
-                    "/main",
-                    "/main/SwitchPanel",
-                    "/main/SettingPanel"
+                    "/main"
                 ],
                 "D:\\MCStudioDownload\\work\\hello_luckyhuang@163.com\\Cpp\\AddOn\\642ba5f7d7214681b76d8a127425b018\\resource_pack_BryQJHR2\\ui\\elytraShow.json": [
                     "/main",

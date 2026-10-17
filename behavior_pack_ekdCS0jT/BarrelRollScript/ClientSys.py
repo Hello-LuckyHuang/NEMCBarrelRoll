@@ -18,6 +18,16 @@ class Main(ClientSystem):
         self.TODEG = 1 / self.TORAD
         self.player_comp = clientApi.GetEngineCompFactory().CreatePlayer(clientApi.GetLocalPlayerId())
         self.camera_comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
+        self.operation_comp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
+        self.settingPanel = None
+        self.flySettingPanel = None
+        self.switchPanel = None
+        self.flyHUDPanel = None
+        self._openingSettings = False
+        self._uiReady = False
+        self._destroyed = False
+        self._dragBeforeFlight = None
+        self.flightRotation = None
 
         self.tick = 0
         self.lt = [0.0,0.0]
@@ -82,6 +92,7 @@ class Main(ClientSystem):
             self.config_comp.SetConfigData("barrelroll_flyshowconfig_flyshowdata", data, True)
 
         self.ListenForEvent(namespace, system_name, "UiInitFinished", self, self.UiInit)#监听处理UI
+        self.ListenForEvent(namespace, system_name, "PushScreenEvent", self, self.onScreenPushed)
         self.ListenForEvent('BRServer', 'BarrelRollServer', "OpenSetting", self, self.openSettingPanel)
             
     def saveConfig(self):
@@ -100,19 +111,95 @@ class Main(ClientSystem):
         }
         self.config_comp.SetConfigData("barrelroll_flyshowconfig_flyshowdata", data, True)
 
-    def openSettingPanel(self, event):
-        self.settingPanel = clientApi.CreateUI('BarrelUI', 'barrelsetting',{"isHud" : 0, "client" : self})
+    def openSettingPanel(self, event=None, source=None):
+        return self._openSettings('barrelsetting', 'settingPanel', source)
+
+    def openFlySettingPanel(self, event=None, source=None):
+        return self._openSettings('flyshowsetting', 'flySettingPanel', source)
+
+    def _openSettings(self, uiKey, panelAttribute, source):
+        if self._destroyed or not self._uiReady or self._openingSettings:
+            return None
+        if source is None:
+            # 保留已打开的页面，避免重复点击覆盖有效引用。
+            for key, attribute in (('barrelsetting', 'settingPanel'),
+                                   ('flyshowsetting', 'flySettingPanel')):
+                panel = getattr(self, attribute)
+                if panel is None:
+                    panel = clientApi.GetUI('BarrelUI', key)
+                if panel is not None:
+                    setattr(self, attribute, panel)
+                    return panel
+        self._openingSettings = True
+        try:
+            panel = getattr(self, panelAttribute)
+            if panel is None:
+                panel = clientApi.GetUI('BarrelUI', uiKey)
+            if panel is not None and getattr(panel, '_closing', False):
+                return None
+            self.resetFlight()
+            if panel is None:
+                panel = clientApi.CreateUI('BarrelUI', uiKey,
+                                           {"isHud": 0, "client": self})
+            if panel is None:
+                return None
+            setattr(self, panelAttribute, panel)
+            if source is not None and source is not panel:
+                source.closeSettingPanel(None)
+            return panel
+        finally:
+            self._openingSettings = False
 
     def UiInit(self, event):
+        if self._destroyed:
+            return
+        self._uiReady = False
+        self.resetFlight()
         clientApi.RegisterUI('BarrelUI', 'barrelswitch', 'BarrelRollScript.ui.BarrelSwitchUI.Main', 'barrelSwitch.main')
-        self.switchPanel = clientApi.CreateUI('BarrelUI', 'barrelswitch',{"isHud" : 1, "client" : self})
-
         clientApi.RegisterUI('BarrelUI', 'flyshowHUD', 'BarrelRollScript.ui.FlyHUDUI.Main', 'fly_HUD.main')
-        self.flyHUDPanel = clientApi.CreateUI('BarrelUI', 'flyshowHUD',{"isHud" : 1, "client" : self})
-
         clientApi.RegisterUI('BarrelUI', 'barrelsetting', 'BarrelRollScript.ui.BarrelSettingUI.Main', 'barrelSetting.main')
-
         clientApi.RegisterUI('BarrelUI', 'flyshowsetting', 'BarrelRollScript.ui.FlyShowSettingUI.Main', 'elytraShow.main')
+        self.settingPanel = clientApi.GetUI('BarrelUI', 'barrelsetting')
+        self.flySettingPanel = clientApi.GetUI('BarrelUI', 'flyshowsetting')
+        self.switchPanel = clientApi.GetUI('BarrelUI', 'barrelswitch')
+        if self.switchPanel is None:
+            self.switchPanel = clientApi.CreateUI('BarrelUI', 'barrelswitch', {"isHud": 1, "client": self})
+        self.flyHUDPanel = clientApi.GetUI('BarrelUI', 'flyshowHUD')
+        if self.flyHUDPanel is None:
+            self.flyHUDPanel = clientApi.CreateUI('BarrelUI', 'flyshowHUD', {"isHud": 1, "client": self})
+        self._uiReady = True
+
+    def onScreenPushed(self, event):
+        if event.get('screenName') != 'hud_screen':
+            self.resetFlight()
+
+    def isInputBlocked(self):
+        if (not self._uiReady or self._openingSettings or
+                self.settingPanel is not None or self.flySettingPanel is not None):
+            return True
+        # GetTopUI 包括背包、暂停、聊天及其他模组 PushScreen 的页面。
+        return clientApi.GetTopUI() != 'hud_screen'
+
+    def resetFlight(self):
+        rotation = self.flightRotation
+        previousDrag = self._dragBeforeFlight
+        self.facing = None
+        self.left = None
+        self.flightRotation = None
+        self._dragBeforeFlight = None
+        self.lt = [0.0, 0.0]
+        self.bt = [0.0, 0.0]
+        self.mouseTurnVec = [0.0, 0.0]
+        self.pitchSmoother.clear()
+        self.yawSmoother.clear()
+        self.rollSmoother.clear()
+        # 仅恢复本系统接管的状态，保留进入前其他组件的拖屏设置。
+        try:
+            if previousDrag is not None:
+                self.operation_comp.SetCanDrag(previousDrag)
+        finally:
+            if rotation is not None:
+                self.camera_comp.SetCameraRotation((rotation[0], rotation[1], 0.0))
 
     # 监听引擎OnScriptTickClient事件，引擎会执行该tick回调，1秒钟30帧
     def OnTickClient(self):
@@ -123,62 +210,61 @@ class Main(ClientSystem):
 
     # 被引擎直接执行的父类的重写函数，引擎会执行该Update回调，1秒钟30帧
     def Update(self):
-        pmcomp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
-        if self.barrelflySwitch == True:
-            if self.player_comp.isGliding():
-                if self.facing == None or self.left == None:
-                    #获取玩家视角，在鞘翅开启时启用。
-                    facingDEG = self.camera_comp.GetCameraRotation()
-                    self.facing = clientApi.GetDirFromRot((facingDEG[0], facingDEG[1]))#获取视向向量
-                    self.left = clientApi.GetDirFromRot((facingDEG[2], facingDEG[1]+90))#获取左向量
-                    # 不响应屏幕拖动
-                    pmcomp.SetCanDrag(False)
-                
-                move = [0.0, 0.0]
-                #获取触摸坐标(测试时F11管用)
-                touchX, touchY = clientApi.GetTouchPos()
-                self.lt = [touchX, touchY]
-                if self.lt != [0.0,0.0] and self.bt != [0.0,0.0]:
-                    move = [self.lt[0]-self.bt[0], self.lt[1]-self.bt[1]]
-                    if math.sqrt(move[0]**2+move[1]**2) <= 120:
-                        self.changeElytraLook(move[1]*self.linminValue, 0, move[0]*self.linminValue)
-                else:
-                    self.mouseTurnVec = [0, 0]
-                    self.changeElytraLook(0, 0, 0)
-                    
-                self.bt = [touchX, touchY]
-            else:
-                if self.facing or self.left:
-                    self.facing = None
-                    self.left = None
-                    #初始化平滑器
-                    self.pitchSmoother.clear()
-                    self.yawSmoother.clear()
-                    self.rollSmoother.clear()
-                    # 响应屏幕拖动
-                    pmcomp.SetCanDrag(True)
-                    facingDEG = self.camera_comp.GetCameraRotation()
-                    self.camera_comp.SetCameraRotation((facingDEG[0], facingDEG[1], 0))
-        else:
-            if self.facing or self.left:
-                self.facing = None
-                self.left = None
-                #初始化平滑器
-                self.pitchSmoother.clear()
-                self.yawSmoother.clear()
-                self.rollSmoother.clear()
-                # 响应屏幕拖动
-                pmcomp.SetCanDrag(True)
-                facingDEG = self.camera_comp.GetCameraRotation()
-                self.camera_comp.SetCameraRotation((facingDEG[0], facingDEG[1], 0))
+        if self._destroyed:
+            return
+        if (not self.barrelflySwitch or not self.player_comp.isGliding() or
+                self.isInputBlocked()):
+            self.resetFlight()
+            return
+        if self.facing is None or self.left is None:
+            # 仅在重新进入飞行时读取相机，后续积分使用脚本姿态。
+            rotation = self.camera_comp.GetCameraRotation()
+            if not self.isFiniteVector(rotation):
+                self.resetFlight()
+                return
+            self.facing = self.norm3D(clientApi.GetDirFromRot((rotation[0], rotation[1])))
+            left = self.getAssumedLeft(rotation[1])
+            self.left = self.norm3D(self.rotateAxisAngle(left, self.facing,
+                                                       -rotation[2] * self.TORAD))
+            self.flightRotation = self.getFlightRotation(self.facing, self.left)
+            if self.flightRotation is None:
+                self.resetFlight()
+                return
+            self.lt = [0.0, 0.0]
+            self.bt = [0.0, 0.0]
+            self._dragBeforeFlight = self.operation_comp.IsCanDrag()
+            self.operation_comp.SetCanDrag(False)
 
-                
+        # 保留当前触摸输入方案，只修复进入/退出时的基线管理。
+        touchX, touchY = clientApi.GetTouchPos()
+        self.lt = [touchX, touchY]
+        if self.lt != [0.0, 0.0] and self.bt != [0.0, 0.0]:
+            move = [self.lt[0] - self.bt[0], self.lt[1] - self.bt[1]]
+            if math.sqrt(move[0]**2 + move[1]**2) <= 120:
+                self.changeElytraLook(move[1]*self.linminValue, 0, move[0]*self.linminValue)
+        else:
+            self.mouseTurnVec = [0.0, 0.0]
+            self.changeElytraLook(0, 0, 0)
+        if self.flightRotation is not None:
+            self.bt = [touchX, touchY]
+
     def Destroy(self):
+        self._destroyed = True
+        self._uiReady = False
+        self.resetFlight()
         namespace = clientApi.GetEngineNamespace()
         system_name = clientApi.GetEngineSystemName()
 
         self.UnListenForEvent(namespace, system_name, "UiInitFinished", self, self.UiInit)#监听处理UI
+        self.UnListenForEvent(namespace, system_name, "PushScreenEvent", self, self.onScreenPushed)
         self.UnListenForEvent('BRServer', 'BarrelRollServer', "OpenSetting", self, self.openSettingPanel)
+        for panel in (self.settingPanel, self.flySettingPanel, self.switchPanel, self.flyHUDPanel):
+            if panel is not None:
+                panel.SetRemove()
+        self.settingPanel = None
+        self.flySettingPanel = None
+        self.switchPanel = None
+        self.flyHUDPanel = None
 
     def changeElytraLook(self, pitch, yaw, roll):
         rotDelta = [pitch, yaw, roll]
@@ -207,19 +293,22 @@ class Main(ClientSystem):
 
     #专门处理摄像机角度的函数
     def changeFacingCamera(self, facingVec, left):
-        pitch = -math.asin(facingVec[1]) * self.TODEG
+        rotation = self.getFlightRotation(facingVec, left)
+        if rotation is None:
+            self.resetFlight()
+            return
+        self.flightRotation = rotation
+        self.camera_comp.SetCameraRotation(rotation)
+
+    def getFlightRotation(self, facingVec, left):
+        if (not self.isFiniteVector(facingVec) or not self.isFiniteVector(left) or
+                self.dotProduct(facingVec, facingVec) < 1E-12 or
+                self.dotProduct(left, left) < 1E-12):
+            return None
+        pitch = -math.asin(self.clamp(facingVec[1], -1.0, 1.0)) * self.TODEG
         yaw = -math.atan2(facingVec[0], facingVec[2]) * self.TODEG
         roll = -self.getRoll(yaw, left)
-
-        # pcomp = clientApi.GetEngineCompFactory().CreatePos(clientApi.GetLocalPlayerId())
-        # pos = pcomp.GetPos()
-
-        self.camera_comp.SetCameraRotation((pitch, yaw, roll))
-        # self.camera_comp.SetCameraPos(pos)
-       
-
-        
-        
+        return (pitch, yaw, roll)
 
     def smooth(self, pitchSmoother, yawSmoother, rollSmoother, rot):
         return (
@@ -229,15 +318,15 @@ class Main(ClientSystem):
                 )
 
     def banking(self, rotDelta):
-        #获取玩家视角
-        comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
-        facing = comp.GetCameraRotation()
-        currentRoll = facing[2] * self.TORAD
+        # 相机读回值存在插值延迟；使用上一次积分得到的逻辑姿态。
+        if self.flightRotation is None:
+            return rotDelta
+        currentRoll = self.flightRotation[2] * self.TORAD
         #消除误差
         if currentRoll < 2E-5 and currentRoll > -2E-5:
             currentRoll = 0
 
-        strength = 10 * math.cos(facing[0] * self.TORAD) * self.strengValue
+        strength = 10 * math.cos(self.flightRotation[0] * self.TORAD) * self.strengValue
         dX = math.sin(currentRoll) * strength
         dY = -strength + math.cos(currentRoll) * strength
         if (math.isnan(dX)):
@@ -312,9 +401,15 @@ class Main(ClientSystem):
     def mul(self, vec0, num):
         return [vec0[0]*num, vec0[1]*num, vec0[2]*num]
     
+    def isFiniteVector(self, vec0):
+        return (vec0 is not None and len(vec0) == 3 and
+                all(not math.isnan(value) and not math.isinf(value) for value in vec0))
+
     def norm3D(self, vec0):
+        if not self.isFiniteVector(vec0):
+            return (0.0, 0.0, 0.0)
         l = vec0[0]**2+vec0[1]**2+vec0[2]**2
-        if l != 0:
+        if l >= 1E-12 and not math.isinf(l):
             m = math.sqrt(l)
             return (vec0[0]/m, vec0[1]/m, vec0[2]/m)
         return (0, 0, 0)

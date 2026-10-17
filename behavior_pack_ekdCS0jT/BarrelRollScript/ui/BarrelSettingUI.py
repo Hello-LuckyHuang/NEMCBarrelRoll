@@ -9,6 +9,7 @@ class Main(ScreenNode):
 	def __init__(self, namespace, name, param):
 		ScreenNode.__init__(self, namespace, name, param)
 		self.client_sys = param['client']#获取客户端
+		self._closing = False
 		self.closeButton = "/setting_title/close_button"#为UI json文件中的路径关系
 		self.linminSlider = "/setting_title/barrel_setting_panel/linmin_slider"
 		self.strengSlider = "/setting_title/barrel_setting_panel/streng_slider"
@@ -53,7 +54,7 @@ class Main(ScreenNode):
 
 		self.linminSliderValue = (self.client_sys.linminValue - 1.0) / (2.5 - 1.0)
 		self.StrengthSliderValue = (self.client_sys.strengValue - 2.0) / (6.0 - 2.0)
-		self.YOverTurnIsOpen = False
+		self.YOverTurnIsOpen = self.client_sys.openYOverturn
 
 		self.linminlabelItem.SetText(str(round(self.lerp(self.linminSliderValue, 1.0, 2.5), 2)))
 		self.strenglabelItem.SetText(str(round(self.lerp(self.StrengthSliderValue, 2.0, 6.0), 2)))
@@ -66,7 +67,9 @@ class Main(ScreenNode):
 			self.YOverTurnlabelItem.SetText("关闭")
 
 	def Destroy(self):
-		pass
+		self._closing = True
+		if self.client_sys.settingPanel is self:
+			self.client_sys.settingPanel = None
 
 	def OnActive(self):
 		pass
@@ -75,21 +78,25 @@ class Main(ScreenNode):
 		pass
 
 	def closeSettingPanel(self, event):
-		self.client_sys.settingPanel.SetRemove()
+		if self._closing:
+			return
+		self._closing = True
+		self.SetRemove()
 	
 	def saveSetting(self, event):
+		if self._closing:
+			return
 		self.client_sys.linminValue = self.lerp(self.linminSliderValue, 1.0, 2.5)
 		self.client_sys.strengValue = self.lerp(self.StrengthSliderValue, 2.0, 6.0)
-		self.client_sys.openYOverturn = self.YOverTurnIsOpen
+		self.client_sys.openYOverturn = self.YOverTurnToggleItem.GetToggleState()
 		self.client_sys.saveConfig()
-		self.client_sys.settingPanel.SetRemove()
+		self.closeSettingPanel(event)
 
 	def reset(self, event):
-		self.client_sys.linminValue = 1.8
-		self.client_sys.strengValue = 4.0
-		self.client_sys.openYOverturn = False
-		self.linminSliderValue = 0.5333333
+		# 还原只修改界面草稿，保存前不影响正在使用的配置。
+		self.linminSliderValue = (1.8 - 1.0) / (2.5 - 1.0)
 		self.StrengthSliderValue = 0.5
+		self.YOverTurnIsOpen = False
 
 		self.linminlabelItem.SetText("1.8")
 		self.strenglabelItem.SetText("4.0")
@@ -99,14 +106,14 @@ class Main(ScreenNode):
 		self.YOverTurnlabelItem.SetText("关闭")
 
 	def openFlySetting(self, event):
-		self.client_sys.flySettingPanel = clientApi.CreateUI('BarrelUI', 'flyshowsetting',{"isHud" : 0, "client" : self.client_sys})
-		self.client_sys.settingPanel.SetRemove()
+		if not self._closing:
+			self.client_sys.openFlySettingPanel(event, source=self)
 
 	def showlisence(self, event):
 		comp = clientApi.GetEngineCompFactory().CreateTextNotifyClient(clientApi.GetLevelId())
 		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"终极翻滚+飞行信息显示组件使用GPL 3.0许可开源")
 		comp.SetLeftCornerNotify(clientApi.GenerateColor("RED")+"组件开源地址:https://github.com/HXzhitang/netease-MC-addon-Barrel-Roll")
-		self.client_sys.settingPanel.SetRemove()
+		self.closeSettingPanel(event)
 
 	@ViewBinder.binding(ViewBinder.BF_SliderChanged | ViewBinder.BF_SliderFinished)
 	def OnlinminSliderChange(self, value, isFinish, _unused):
