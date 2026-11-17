@@ -25,6 +25,8 @@ class Main(ClientSystem):
         self._uiReady = False
         self._destroyed = False
         self._dragBeforeFlight = None
+        self._gyroLastTimestamp = None
+        self._gyroSensorActive = False
         self.flightRotation = None
 
         self.tick = 0
@@ -47,16 +49,24 @@ class Main(ClientSystem):
         self.linminValue = 0.0
         self.strengValue = 0.0
         self.openYOverturn = False
+        self.gyroControl = False
         rollConfigDict = self.config_comp.GetConfigData("barrelroll_rollconfig_rolldata", True)
         if rollConfigDict:
             self.linminValue = rollConfigDict["linminValue"]
             self.strengValue = rollConfigDict["strengthValue"]
             self.openYOverturn = rollConfigDict["openYOverturn"]
+            self.gyroControl = rollConfigDict.get("gyroControl", False)
         else:
             self.linminValue = 1.8
             self.strengValue = 4.0
             self.openYOverturn = False
-            data = {"linminValue": 1.8, "strengthValue": 4.0, "openYOverturn": False}
+            self.gyroControl = False
+            data = {
+                "linminValue": 1.8,
+                "strengthValue": 4.0,
+                "openYOverturn": False,
+                "gyroControl": False
+            }
             #保存一下数据
             self.config_comp.SetConfigData("barrelroll_rollconfig_rolldata", data, True)
 
@@ -91,10 +101,16 @@ class Main(ClientSystem):
 
         self.ListenForEvent(namespace, system_name, "UiInitFinished", self, self.UiInit)#监听处理UI
         self.ListenForEvent(namespace, system_name, "PushScreenEvent", self, self.onScreenPushed)
+        self.ListenForEvent(namespace, system_name, "GyroSensorChangedClientEvent", self, self.onGyroSensorChanged)
         self.ListenForEvent('BRServer', 'BarrelRollServer', "OpenSetting", self, self.openSettingPanel)
             
     def saveConfig(self):
-        data = {"linminValue": self.linminValue, "strengthValue": self.strengValue, "openYOverturn": self.openYOverturn}
+        data = {
+            "linminValue": self.linminValue,
+            "strengthValue": self.strengValue,
+            "openYOverturn": self.openYOverturn,
+            "gyroControl": self.gyroControl
+        }
         self.config_comp.SetConfigData("barrelroll_rollconfig_rolldata", data, True)
     
     def saveflyHUDConfig(self):
@@ -140,8 +156,10 @@ class Main(ClientSystem):
                     self.onRollSliderChanged, 4, self._strengthToSlider())
          .AddToggle("invert_y", "Y轴反转", self.onSettingToggleChanged,
                     5, self.openYOverturn)
+         .AddToggle("gyro_control", "陀螺仪控制（仅移动端）", self.onSettingToggleChanged,
+                    6, self.gyroControl)
          .AddButton("reset_roll", "翻滚参数", "恢复默认",
-                    self.onResetRollSettings, 6)
+                    self.onResetRollSettings, 7)
          .AddText("fly_hud_section", "飞行信息显示设置", 10)
          .AddToggle("show_angle", "角度显示", self.onSettingToggleChanged,
                     11, self.angleshow)
@@ -184,6 +202,8 @@ class Main(ClientSystem):
          .SetText("barrel_current_values", self.getRollValueText())
          .SetToggleDefault("invert_y", self.openYOverturn)
          .SetToggleValue("invert_y", self.openYOverturn)
+         .SetToggleDefault("gyro_control", self.gyroControl)
+         .SetToggleValue("gyro_control", self.gyroControl)
          .SetToggleDefault("show_angle", self.angleshow)
          .SetToggleValue("show_angle", self.angleshow)
          .SetToggleDefault("show_fly_hud", self.flyHUDshow)
@@ -215,6 +235,9 @@ class Main(ClientSystem):
             self.openYOverturn = value
             self.saveConfig()
             return
+        if key == "gyro_control":
+            self.setGyroControlEnabled(value)
+            return
         attributes = {
             "show_angle": "angleshow",
             "show_fly_hud": "flyHUDshow",
@@ -235,6 +258,7 @@ class Main(ClientSystem):
         self.linminValue = 1.8
         self.strengValue = 4.0
         self.openYOverturn = False
+        self.setGyroControlEnabled(False, False)
         self.saveConfig()
         self.syncModSettingValues()
         gameComp = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId())
@@ -265,6 +289,7 @@ class Main(ClientSystem):
             self.flyHUDPanel = clientApi.CreateUI('BarrelUI', 'flyshowHUD', {"isHud": 1, "client": self})
         self._uiReady = True
         self.registerModSettings()
+        self.updateGyroSensorState()
 
     def onScreenPushed(self, event):
         if event.get('screenName') != 'hud_screen':
@@ -283,6 +308,7 @@ class Main(ClientSystem):
         self.left = None
         self.flightRotation = None
         self._dragBeforeFlight = None
+        self._gyroLastTimestamp = None
         self.lt = [0.0, 0.0]
         self.bt = [0.0, 0.0]
         self.mouseTurnVec = [0.0, 0.0]
@@ -353,7 +379,11 @@ class Main(ClientSystem):
 
         self.UnListenForEvent(namespace, system_name, "UiInitFinished", self, self.UiInit)#监听处理UI
         self.UnListenForEvent(namespace, system_name, "PushScreenEvent", self, self.onScreenPushed)
+        self.UnListenForEvent(namespace, system_name, "GyroSensorChangedClientEvent", self, self.onGyroSensorChanged)
         self.UnListenForEvent('BRServer', 'BarrelRollServer', "OpenSetting", self, self.openSettingPanel)
+        if self._gyroSensorActive:
+            clientApi.ToggleGyroSensor(False)
+            self._gyroSensorActive = False
         for panel in (self.switchPanel, self.flyHUDPanel):
             if panel is not None:
                 panel.SetRemove()
@@ -361,6 +391,62 @@ class Main(ClientSystem):
         self.neteaseWindowComp = None
         self.switchPanel = None
         self.flyHUDPanel = None
+
+    def setGyroControlEnabled(self, enabled, shouldSave=True):
+        self.gyroControl = bool(enabled)
+        self._gyroLastTimestamp = None
+        self.updateGyroSensorState()
+        if shouldSave:
+            self.saveConfig()
+
+    def updateGyroSensorState(self):
+        shouldEnable = self.gyroControl and not self._destroyed
+        if shouldEnable:
+            self._gyroSensorActive = bool(clientApi.ToggleGyroSensor(True))
+            if self._gyroSensorActive:
+                # 文档要求每次开启采集后重新设置上报频率。
+                clientApi.SetGyroSensorReportRate(30)
+        else:
+            if self._gyroSensorActive:
+                clientApi.ToggleGyroSensor(False)
+            self._gyroSensorActive = False
+
+    def onGyroSensorChanged(self, event):
+        timestamp = event.get("timestamp")
+        if timestamp is None:
+            return
+        timestamp = float(timestamp)
+        previousTimestamp = self._gyroLastTimestamp
+        self._gyroLastTimestamp = timestamp
+        if (not self.gyroControl or self._destroyed or not self._uiReady or
+                not self.barrelflySwitch or not self.player_comp.isGliding() or
+                self.isInputBlocked() or self.facing is None or self.left is None):
+            return
+        if previousTimestamp is None:
+            return
+        elapsed = timestamp - previousTimestamp
+        if elapsed <= 0.0 or elapsed > 0.25:
+            return
+
+        screenX, screenY, screenZ = self.getScreenGyroRates(
+            float(event.get("xDiff", 0.0)),
+            float(event.get("yDiff", 0.0)),
+            float(event.get("zDiff", 0.0)),
+            int(event.get("orientation", 0)))
+        # 角速度乘以事件间隔得到转角，再换算为摄像机控制输入。
+        scale = (self.linminValue / 1.8) * elapsed * self.TODEG / 0.45
+        gyroDelta = [-screenX * scale, -screenY * scale, -screenZ * scale]
+        gyroDelta = self.applyInvertPitch(gyroDelta, self.openYOverturn)
+        self.changeElytraLookDirectly(gyroDelta)
+
+    def getScreenGyroRates(self, xRate, yRate, zRate, orientation):
+        if orientation == 1:
+            return (yRate, -xRate, zRate)
+        if orientation == 2:
+            return (-xRate, -yRate, zRate)
+        if orientation == 3:
+            return (-yRate, xRate, zRate)
+        return (xRate, yRate, zRate)
 
     def changeElytraLook(self, pitch, yaw, roll):
         rotDelta = [pitch, yaw, roll]
