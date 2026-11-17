@@ -18,6 +18,8 @@ class Main(ClientSystem):
         self.player_comp = clientApi.GetEngineCompFactory().CreatePlayer(clientApi.GetLocalPlayerId())
         self.camera_comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
         self.operation_comp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
+        self.motion_comp = clientApi.GetEngineCompFactory().CreateActorMotion(clientApi.GetLocalPlayerId())
+        self.post_process_comp = clientApi.GetEngineCompFactory().CreatePostProcess(clientApi.GetLevelId())
         self.neteaseWindowComp = None
         self.settingInst = None
         self.switchPanel = None
@@ -27,6 +29,8 @@ class Main(ClientSystem):
         self._dragBeforeFlight = None
         self._gyroLastTimestamp = None
         self._gyroSensorActive = False
+        self._blurOwned = False
+        self._blurRadius = 0.0
         self.flightRotation = None
 
         self.tick = 0
@@ -50,22 +54,26 @@ class Main(ClientSystem):
         self.strengValue = 0.0
         self.openYOverturn = False
         self.gyroControl = False
+        self.dynamicBlur = False
         rollConfigDict = self.config_comp.GetConfigData("barrelroll_rollconfig_rolldata", True)
         if rollConfigDict:
             self.linminValue = rollConfigDict["linminValue"]
             self.strengValue = rollConfigDict["strengthValue"]
             self.openYOverturn = rollConfigDict["openYOverturn"]
             self.gyroControl = rollConfigDict.get("gyroControl", False)
+            self.dynamicBlur = rollConfigDict.get("dynamicBlur", False)
         else:
             self.linminValue = 1.8
             self.strengValue = 4.0
             self.openYOverturn = False
             self.gyroControl = False
+            self.dynamicBlur = False
             data = {
                 "linminValue": 1.8,
                 "strengthValue": 4.0,
                 "openYOverturn": False,
-                "gyroControl": False
+                "gyroControl": False,
+                "dynamicBlur": False
             }
             #保存一下数据
             self.config_comp.SetConfigData("barrelroll_rollconfig_rolldata", data, True)
@@ -109,7 +117,8 @@ class Main(ClientSystem):
             "linminValue": self.linminValue,
             "strengthValue": self.strengValue,
             "openYOverturn": self.openYOverturn,
-            "gyroControl": self.gyroControl
+            "gyroControl": self.gyroControl,
+            "dynamicBlur": self.dynamicBlur
         }
         self.config_comp.SetConfigData("barrelroll_rollconfig_rolldata", data, True)
     
@@ -158,8 +167,10 @@ class Main(ClientSystem):
                     5, self.openYOverturn)
          .AddToggle("gyro_control", "陀螺仪控制（仅移动端）", self.onSettingToggleChanged,
                     6, self.gyroControl)
+         .AddToggle("dynamic_blur", "动态模糊", self.onSettingToggleChanged,
+                    7, self.dynamicBlur)
          .AddButton("reset_roll", "翻滚参数", "恢复默认",
-                    self.onResetRollSettings, 7)
+                    self.onResetRollSettings, 8)
          .AddText("fly_hud_section", "飞行信息显示设置", 10)
          .AddToggle("show_angle", "角度显示", self.onSettingToggleChanged,
                     11, self.angleshow)
@@ -204,6 +215,8 @@ class Main(ClientSystem):
          .SetToggleValue("invert_y", self.openYOverturn)
          .SetToggleDefault("gyro_control", self.gyroControl)
          .SetToggleValue("gyro_control", self.gyroControl)
+         .SetToggleDefault("dynamic_blur", self.dynamicBlur)
+         .SetToggleValue("dynamic_blur", self.dynamicBlur)
          .SetToggleDefault("show_angle", self.angleshow)
          .SetToggleValue("show_angle", self.angleshow)
          .SetToggleDefault("show_fly_hud", self.flyHUDshow)
@@ -238,6 +251,9 @@ class Main(ClientSystem):
         if key == "gyro_control":
             self.setGyroControlEnabled(value)
             return
+        if key == "dynamic_blur":
+            self.setDynamicBlurEnabled(value)
+            return
         attributes = {
             "show_angle": "angleshow",
             "show_fly_hud": "flyHUDshow",
@@ -259,6 +275,7 @@ class Main(ClientSystem):
         self.strengValue = 4.0
         self.openYOverturn = False
         self.setGyroControlEnabled(False, False)
+        self.setDynamicBlurEnabled(False, False)
         self.saveConfig()
         self.syncModSettingValues()
         gameComp = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId())
@@ -302,6 +319,7 @@ class Main(ClientSystem):
         return clientApi.GetTopUI() != 'hud_screen'
 
     def resetFlight(self):
+        self.disableDynamicBlur()
         rotation = self.flightRotation
         previousDrag = self._dragBeforeFlight
         self.facing = None
@@ -369,6 +387,7 @@ class Main(ClientSystem):
             self.changeElytraLook(0, 0, 0)
         if self.flightRotation is not None:
             self.bt = [touchX, touchY]
+        self.updateDynamicBlur()
 
     def Destroy(self):
         self._destroyed = True
@@ -384,6 +403,7 @@ class Main(ClientSystem):
         if self._gyroSensorActive:
             clientApi.ToggleGyroSensor(False)
             self._gyroSensorActive = False
+        self.disableDynamicBlur()
         for panel in (self.switchPanel, self.flyHUDPanel):
             if panel is not None:
                 panel.SetRemove()
@@ -447,6 +467,48 @@ class Main(ClientSystem):
         if orientation == 3:
             return (-yRate, xRate, zRate)
         return (xRate, yRate, zRate)
+
+    def setDynamicBlurEnabled(self, enabled, shouldSave=True):
+        self.dynamicBlur = bool(enabled)
+        if not self.dynamicBlur:
+            self.disableDynamicBlur()
+        if shouldSave:
+            self.saveConfig()
+
+    def updateDynamicBlur(self):
+        if not self.dynamicBlur:
+            self.disableDynamicBlur()
+            return
+        motion = self.motion_comp.GetMotion()
+        if not self.isFiniteVector(motion):
+            self.disableDynamicBlur()
+            return
+
+        # GetMotion返回每帧位移，按客户端30帧换算为方块/秒。
+        speed = math.sqrt(self.dotProduct(motion, motion)) * 30.0
+        targetRadius = self.clamp((speed - 10.0) * 0.25, 0.0, 6.0)
+        self._blurRadius += (targetRadius - self._blurRadius) * 0.2
+        if abs(targetRadius - self._blurRadius) < 0.02:
+            self._blurRadius = targetRadius
+        if self._blurRadius <= 0.02 and targetRadius <= 0.0:
+            self.disableDynamicBlur()
+            return
+
+        if not self._blurOwned:
+            # 不覆盖其他组件已经开启的全局高斯模糊。
+            if self.post_process_comp.CheckGaussianBlurEnabled():
+                return
+            if not self.post_process_comp.SetEnableGaussianBlur(True):
+                return
+            self._blurOwned = True
+        self.post_process_comp.SetGaussianBlurRadius(self._blurRadius)
+
+    def disableDynamicBlur(self):
+        if self._blurOwned:
+            self.post_process_comp.SetGaussianBlurRadius(0.0)
+            self.post_process_comp.SetEnableGaussianBlur(False)
+            self._blurOwned = False
+        self._blurRadius = 0.0
 
     def changeElytraLook(self, pitch, yaw, roll):
         rotDelta = [pitch, yaw, roll]
