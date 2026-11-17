@@ -40,6 +40,8 @@ class Main(ClientSystem):
         self.tick = 0
         self.lt = [0.0,0.0]
         self.bt = [0.0,0.0]
+        self._touchDragAccum = [0.0, 0.0]
+        self._touchDragging = False
 
         self.mouseTurnVec = [0.0, 0.0]
 
@@ -338,6 +340,8 @@ class Main(ClientSystem):
         self._blurLastRotation = None
         self.lt = [0.0, 0.0]
         self.bt = [0.0, 0.0]
+        self._touchDragAccum = [0.0, 0.0]
+        self._touchDragging = False
         self.mouseTurnVec = [0.0, 0.0]
         self.pitchSmoother.clear()
         self.yawSmoother.clear()
@@ -381,17 +385,32 @@ class Main(ClientSystem):
                 return
             self.lt = [0.0, 0.0]
             self.bt = [0.0, 0.0]
+            self._touchDragAccum = [0.0, 0.0]
+            self._touchDragging = False
             self._dragBeforeFlight = self.operation_comp.IsCanDrag()
             self.operation_comp.SetCanDrag(False)
 
-        # 保留当前触摸输入方案，只修复进入/退出时的基线管理。
+        # 累计超过触摸拖动阈值后才开始转向，避免相邻两次点击被当成拖动。
         touchX, touchY = clientApi.GetTouchPos()
         self.lt = [touchX, touchY]
         move = [self.mouseTurnVec[0], self.mouseTurnVec[1]]
         self.mouseTurnVec = [0.0, 0.0]
         if self.lt != [0.0, 0.0] and self.bt != [0.0, 0.0]:
-            move[0] += self.lt[0] - self.bt[0]
-            move[1] += self.lt[1] - self.bt[1]
+            touchMove = [self.lt[0] - self.bt[0], self.lt[1] - self.bt[1]]
+            if self._touchDragging:
+                move[0] += touchMove[0]
+                move[1] += touchMove[1]
+            else:
+                self._touchDragAccum[0] += touchMove[0]
+                self._touchDragAccum[1] += touchMove[1]
+                if math.sqrt(self._touchDragAccum[0]**2 + self._touchDragAccum[1]**2) >= 6.0:
+                    self._touchDragging = True
+                    move[0] += self._touchDragAccum[0]
+                    move[1] += self._touchDragAccum[1]
+                    self._touchDragAccum = [0.0, 0.0]
+        elif self.lt == [0.0, 0.0]:
+            self._touchDragAccum = [0.0, 0.0]
+            self._touchDragging = False
         if math.sqrt(move[0]**2 + move[1]**2) <= 120:
             self.changeElytraLook(move[1]*self.linminValue, 0, move[0]*self.linminValue)
         else:
