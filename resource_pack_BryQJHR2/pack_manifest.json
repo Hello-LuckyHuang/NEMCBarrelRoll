@@ -8,6 +8,11 @@
             0,
             0,
             3
+        ],
+        "min_engine_version": [
+            1,
+            18,
+            0
         ]
     },
     "modules": [
