@@ -2,7 +2,6 @@
 
 import mod.client.extraClientApi as clientApi
 import math
-import time
 ClientSystem = clientApi.GetClientSystemCls()
 
 
@@ -19,11 +18,10 @@ class Main(ClientSystem):
         self.player_comp = clientApi.GetEngineCompFactory().CreatePlayer(clientApi.GetLocalPlayerId())
         self.camera_comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
         self.operation_comp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
-        self.settingPanel = None
-        self.flySettingPanel = None
+        self.neteaseWindowComp = None
+        self.settingInst = None
         self.switchPanel = None
         self.flyHUDPanel = None
-        self._openingSettings = False
         self._uiReady = False
         self._destroyed = False
         self._dragBeforeFlight = None
@@ -112,43 +110,145 @@ class Main(ClientSystem):
         self.config_comp.SetConfigData("barrelroll_flyshowconfig_flyshowdata", data, True)
 
     def openSettingPanel(self, event=None, source=None):
-        return self._openSettings('barrelsetting', 'settingPanel', source)
+        if self._destroyed or not self._uiReady:
+            return False
+        if self.settingInst is None:
+            self.registerModSettings()
+        if self.neteaseWindowComp is None or self.settingInst is None:
+            return False
+        self.resetFlight()
+        return self.neteaseWindowComp.OpenSettingUI()
 
-    def openFlySettingPanel(self, event=None, source=None):
-        return self._openSettings('flyshowsetting', 'flySettingPanel', source)
+    def registerModSettings(self):
+        if self._destroyed or self.settingInst is not None:
+            return
+        self.neteaseWindowComp = clientApi.GetEngineCompFactory().CreateNeteaseWindow(clientApi.GetLevelId())
+        self.settingInst = self.neteaseWindowComp.RegisterSettingInst(
+            "BarrelRollScript", "滚筒飞行", None)
+        if self.settingInst is None:
+            return
+        self.settingInst.Clear()
 
-    def _openSettings(self, uiKey, panelAttribute, source):
-        if self._destroyed or not self._uiReady or self._openingSettings:
-            return None
-        if source is None:
-            # 保留已打开的页面，避免重复点击覆盖有效引用。
-            for key, attribute in (('barrelsetting', 'settingPanel'),
-                                   ('flyshowsetting', 'flySettingPanel')):
-                panel = getattr(self, attribute)
-                if panel is None:
-                    panel = clientApi.GetUI('BarrelUI', key)
-                if panel is not None:
-                    setattr(self, attribute, panel)
-                    return panel
-        self._openingSettings = True
-        try:
-            panel = getattr(self, panelAttribute)
-            if panel is None:
-                panel = clientApi.GetUI('BarrelUI', uiKey)
-            if panel is not None and getattr(panel, '_closing', False):
-                return None
-            self.resetFlight()
-            if panel is None:
-                panel = clientApi.CreateUI('BarrelUI', uiKey,
-                                           {"isHud": 0, "client": self})
-            if panel is None:
-                return None
-            setattr(self, panelAttribute, panel)
-            if source is not None and source is not panel:
-                source.closeSettingPanel(None)
-            return panel
-        finally:
-            self._openingSettings = False
+        # 官方通用设置滑块只支持整数，使用档位映射保留原来的 0.1 精度。
+        (self.settingInst
+         .AddText("barrel_section", "翻滚飞行设置", 0)
+         .AddText("barrel_slider_hint", "灵敏度每档0.1（1.0～2.5）；回正强度每档0.1（2.0～6.0）", 1)
+         .AddText("barrel_current_values", self.getRollValueText(), 2)
+         .AddSlider("roll_sensitivity", "操作灵敏度", 15,
+                    self.onRollSliderChanged, 3, self._linminToSlider())
+         .AddSlider("roll_strength", "自动回正强度", 40,
+                    self.onRollSliderChanged, 4, self._strengthToSlider())
+         .AddToggle("invert_y", "Y轴反转", self.onSettingToggleChanged,
+                    5, self.openYOverturn)
+         .AddButton("reset_roll", "翻滚参数", "恢复默认",
+                    self.onResetRollSettings, 6)
+         .AddText("fly_hud_section", "飞行信息显示设置", 10)
+         .AddToggle("show_angle", "角度显示", self.onSettingToggleChanged,
+                    11, self.angleshow)
+         .AddToggle("show_fly_hud", "飞行HUD显示", self.onSettingToggleChanged,
+                    12, self.flyHUDshow)
+         .AddToggle("show_elytra_durability", "鞘翅耐久显示", self.onSettingToggleChanged,
+                    13, self.elytradurabilityshow)
+         .AddToggle("show_fly_speed", "飞行速度显示", self.onSettingToggleChanged,
+                    14, self.flyspeedshow)
+         .AddToggle("show_direction", "方向显示", self.onSettingToggleChanged,
+                    15, self.directionshow)
+         .AddToggle("show_map", "地图显示", self.onSettingToggleChanged,
+                    16, self.mapshow)
+         .AddToggle("use_hud_screen", "使用HUD界面显示", self.onSettingToggleChanged,
+                    17, self.HUDScreen)
+         .AddButton("show_license", "开源许可", "查看说明",
+                    self.onShowLicense, 20))
+        self.syncModSettingValues()
+
+    def _linminToSlider(self):
+        return self.clampInt(round((self.linminValue - 1.0) * 10), 0, 15)
+
+    def _strengthToSlider(self):
+        return self.clampInt(round((self.strengValue - 2.0) * 10), 0, 40)
+
+    def clampInt(self, value, minValue, maxValue):
+        return max(minValue, min(maxValue, int(value)))
+
+    def getRollValueText(self):
+        return "当前：灵敏度 %.1f，回正强度 %.1f" % (self.linminValue, self.strengValue)
+
+    def syncModSettingValues(self):
+        if self.settingInst is None:
+            return
+        (self.settingInst
+         .SetSliderDefault("roll_sensitivity", self._linminToSlider())
+         .SetSliderValue("roll_sensitivity", self._linminToSlider())
+         .SetSliderDefault("roll_strength", self._strengthToSlider())
+         .SetSliderValue("roll_strength", self._strengthToSlider())
+         .SetText("barrel_current_values", self.getRollValueText())
+         .SetToggleDefault("invert_y", self.openYOverturn)
+         .SetToggleValue("invert_y", self.openYOverturn)
+         .SetToggleDefault("show_angle", self.angleshow)
+         .SetToggleValue("show_angle", self.angleshow)
+         .SetToggleDefault("show_fly_hud", self.flyHUDshow)
+         .SetToggleValue("show_fly_hud", self.flyHUDshow)
+         .SetToggleDefault("show_elytra_durability", self.elytradurabilityshow)
+         .SetToggleValue("show_elytra_durability", self.elytradurabilityshow)
+         .SetToggleDefault("show_fly_speed", self.flyspeedshow)
+         .SetToggleValue("show_fly_speed", self.flyspeedshow)
+         .SetToggleDefault("show_direction", self.directionshow)
+         .SetToggleValue("show_direction", self.directionshow)
+         .SetToggleDefault("show_map", self.mapshow)
+         .SetToggleValue("show_map", self.mapshow)
+         .SetToggleDefault("use_hud_screen", self.HUDScreen)
+         .SetToggleValue("use_hud_screen", self.HUDScreen))
+
+    def onRollSliderChanged(self, key, value):
+        value = int(value)
+        if key == "roll_sensitivity":
+            self.linminValue = round(1.0 + self.clampInt(value, 0, 15) * 0.1, 1)
+        elif key == "roll_strength":
+            self.strengValue = round(2.0 + self.clampInt(value, 0, 40) * 0.1, 1)
+        self.saveConfig()
+        if self.settingInst is not None:
+            self.settingInst.SetText("barrel_current_values", self.getRollValueText())
+
+    def onSettingToggleChanged(self, key, value):
+        value = bool(value)
+        if key == "invert_y":
+            self.openYOverturn = value
+            self.saveConfig()
+            return
+        attributes = {
+            "show_angle": "angleshow",
+            "show_fly_hud": "flyHUDshow",
+            "show_elytra_durability": "elytradurabilityshow",
+            "show_fly_speed": "flyspeedshow",
+            "show_direction": "directionshow",
+            "show_map": "mapshow",
+            "use_hud_screen": "HUDScreen"
+        }
+        attribute = attributes.get(key)
+        if attribute is None:
+            return
+        setattr(self, attribute, value)
+        self.saveflyHUDConfig()
+        self.refreshFlyHUD()
+
+    def onResetRollSettings(self, key, value):
+        self.linminValue = 1.8
+        self.strengValue = 4.0
+        self.openYOverturn = False
+        self.saveConfig()
+        self.syncModSettingValues()
+        gameComp = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId())
+        gameComp.SetTipMessage("翻滚参数已恢复默认")
+
+    def onShowLicense(self, key, value):
+        self.neteaseWindowComp.CloseSettingUI()
+        comp = clientApi.GetEngineCompFactory().CreateTextNotifyClient(clientApi.GetLevelId())
+        comp.SetLeftCornerNotify(clientApi.GenerateColor("RED") + "终极翻滚+飞行信息显示组件使用GPL 3.0许可开源")
+        comp.SetLeftCornerNotify(clientApi.GenerateColor("RED") + "组件开源地址:https://github.com/HXzhitang/netease-MC-addon-Barrel-Roll")
+
+    def refreshFlyHUD(self):
+        if self.flyHUDPanel is not None:
+            self.flyHUDPanel.fleshHUDShow()
 
     def UiInit(self, event):
         if self._destroyed:
@@ -157,10 +257,6 @@ class Main(ClientSystem):
         self.resetFlight()
         clientApi.RegisterUI('BarrelUI', 'barrelswitch', 'BarrelRollScript.ui.BarrelSwitchUI.Main', 'barrelSwitch.main')
         clientApi.RegisterUI('BarrelUI', 'flyshowHUD', 'BarrelRollScript.ui.FlyHUDUI.Main', 'fly_HUD.main')
-        clientApi.RegisterUI('BarrelUI', 'barrelsetting', 'BarrelRollScript.ui.BarrelSettingUI.Main', 'barrelSetting.main')
-        clientApi.RegisterUI('BarrelUI', 'flyshowsetting', 'BarrelRollScript.ui.FlyShowSettingUI.Main', 'elytraShow.main')
-        self.settingPanel = clientApi.GetUI('BarrelUI', 'barrelsetting')
-        self.flySettingPanel = clientApi.GetUI('BarrelUI', 'flyshowsetting')
         self.switchPanel = clientApi.GetUI('BarrelUI', 'barrelswitch')
         if self.switchPanel is None:
             self.switchPanel = clientApi.CreateUI('BarrelUI', 'barrelswitch', {"isHud": 1, "client": self})
@@ -168,14 +264,14 @@ class Main(ClientSystem):
         if self.flyHUDPanel is None:
             self.flyHUDPanel = clientApi.CreateUI('BarrelUI', 'flyshowHUD', {"isHud": 1, "client": self})
         self._uiReady = True
+        self.registerModSettings()
 
     def onScreenPushed(self, event):
         if event.get('screenName') != 'hud_screen':
             self.resetFlight()
 
     def isInputBlocked(self):
-        if (not self._uiReady or self._openingSettings or
-                self.settingPanel is not None or self.flySettingPanel is not None):
+        if not self._uiReady:
             return True
         # GetTopUI 包括背包、暂停、聊天及其他模组 PushScreen 的页面。
         return clientApi.GetTopUI() != 'hud_screen'
@@ -258,11 +354,11 @@ class Main(ClientSystem):
         self.UnListenForEvent(namespace, system_name, "UiInitFinished", self, self.UiInit)#监听处理UI
         self.UnListenForEvent(namespace, system_name, "PushScreenEvent", self, self.onScreenPushed)
         self.UnListenForEvent('BRServer', 'BarrelRollServer', "OpenSetting", self, self.openSettingPanel)
-        for panel in (self.settingPanel, self.flySettingPanel, self.switchPanel, self.flyHUDPanel):
+        for panel in (self.switchPanel, self.flyHUDPanel):
             if panel is not None:
                 panel.SetRemove()
-        self.settingPanel = None
-        self.flySettingPanel = None
+        self.settingInst = None
+        self.neteaseWindowComp = None
         self.switchPanel = None
         self.flyHUDPanel = None
 
