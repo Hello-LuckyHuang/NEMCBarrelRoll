@@ -29,8 +29,8 @@ class Main(ClientSystem):
         self._dragBeforeFlight = None
         self._gyroLastTimestamp = None
         self._gyroSensorActive = False
-        self._blurOwned = False
         self._blurRadius = 0.0
+        self._blurProcessName = None
         self.flightRotation = None
 
         self.tick = 0
@@ -486,7 +486,9 @@ class Main(ClientSystem):
 
         # GetMotion返回每帧位移，按客户端30帧换算为方块/秒。
         speed = math.sqrt(self.dotProduct(motion, motion)) * 30.0
-        targetRadius = self.clamp((speed - 10.0) * 0.25, 0.0, 6.0)
+        # Windows端的内置GaussianBlur包装接口会解引用空对象，改用三个
+        # 已注册的自定义后处理档位，以缩放层数表达动态模糊强度。
+        targetRadius = self.clamp((speed - 10.0) / 7.0, 0.0, 3.0)
         self._blurRadius += (targetRadius - self._blurRadius) * 0.2
         if abs(targetRadius - self._blurRadius) < 0.02:
             self._blurRadius = targetRadius
@@ -494,20 +496,31 @@ class Main(ClientSystem):
             self.disableDynamicBlur()
             return
 
-        if not self._blurOwned:
-            # 不覆盖其他组件已经开启的全局高斯模糊。
-            if self.post_process_comp.CheckGaussianBlurEnabled():
-                return
-            if not self.post_process_comp.SetEnableGaussianBlur(True):
-                return
-            self._blurOwned = True
-        self.post_process_comp.SetGaussianBlurRadius(self._blurRadius)
+        blurLevel = self.clampInt(math.ceil(self._blurRadius), 1, 3)
+        self.setDynamicBlurLevel(blurLevel)
+
+    def setDynamicBlurLevel(self, level):
+        processNames = (
+            "barrel_motion_blur_light",
+            "barrel_motion_blur_medium",
+            "barrel_motion_blur_strong"
+        )
+        processName = processNames[self.clampInt(level, 1, 3) - 1]
+        if processName == self._blurProcessName:
+            return
+        processOrder = self.post_process_comp.GetPostProcessOrder()
+        if not processOrder or processName not in processOrder:
+            return
+        if self._blurProcessName is not None:
+            self.post_process_comp.SetEnableByName(self._blurProcessName, False)
+            self._blurProcessName = None
+        if self.post_process_comp.SetEnableByName(processName, True):
+            self._blurProcessName = processName
 
     def disableDynamicBlur(self):
-        if self._blurOwned:
-            self.post_process_comp.SetGaussianBlurRadius(0.0)
-            self.post_process_comp.SetEnableGaussianBlur(False)
-            self._blurOwned = False
+        if self._blurProcessName is not None:
+            self.post_process_comp.SetEnableByName(self._blurProcessName, False)
+            self._blurProcessName = None
         self._blurRadius = 0.0
 
     def changeElytraLook(self, pitch, yaw, roll):
