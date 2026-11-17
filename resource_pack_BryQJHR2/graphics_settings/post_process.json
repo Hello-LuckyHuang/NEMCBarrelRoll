@@ -1,0 +1,27 @@
+{
+  "render_order": [
+    "barrel_motion_blur"
+  ],
+  "process_array": [
+    {
+      "name": "barrel_motion_blur",
+      "enable": false,
+      "paras": [
+        {
+          "name": "rotation",
+          "value": [0.0, 0.0, 0.0, 0.0],
+          "range": [-1.0, 1.0]
+        }
+      ],
+      "pass_array": [
+        {
+          "render_target": {
+            "width": 1.0,
+            "height": 1.0
+          },
+          "material": "barrel_motion_blur_mat"
+        }
+      ]
+    }
+  ]
+}

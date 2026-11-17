@@ -1,0 +1,27 @@
+// __multiversion__
+
+precision highp float;
+
+#include "fragmentVersionCentroidUV.h"
+#include "util.h"
+
+LAYOUT_BINDING(0) uniform sampler2D TEXTURE_0;
+
+// 水平转动方向、垂直转动方向、翻滚方向、模糊强度。
+uniform vec4 EXTRA_VECTOR1;
+
+void main()
+{
+    float strength = clamp(EXTRA_VECTOR1.w, 0.0, 0.20);
+    vec2 linearDirection = vec2(EXTRA_VECTOR1.x, -EXTRA_VECTOR1.y) * 0.016;
+    vec2 rollDirection = vec2(-(uv.y - 0.5), uv.x - 0.5) * EXTRA_VECTOR1.z * 0.022;
+    vec2 offset = (linearDirection + rollDirection) * strength;
+
+    vec4 color = texture(TEXTURE_0, uv) * 0.34;
+    color += texture(TEXTURE_0, uv - offset * 0.25) * 0.24;
+    color += texture(TEXTURE_0, uv - offset * 0.50) * 0.18;
+    color += texture(TEXTURE_0, uv - offset * 0.75) * 0.14;
+    color += texture(TEXTURE_0, uv - offset) * 0.10;
+
+    gl_FragColor = vec4(color.rgb, 1.0);
+}

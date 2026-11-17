@@ -18,7 +18,6 @@ class Main(ClientSystem):
         self.player_comp = clientApi.GetEngineCompFactory().CreatePlayer(clientApi.GetLocalPlayerId())
         self.camera_comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
         self.operation_comp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
-        self.motion_comp = clientApi.GetEngineCompFactory().CreateActorMotion(clientApi.GetLocalPlayerId())
         # Windows RenderDragon无法加载旧后处理链的内置材质，启用时会在原生层断言。
         self._dynamicBlurSupported = clientApi.GetPlatform() != 0
         self.post_process_comp = None
@@ -35,6 +34,7 @@ class Main(ClientSystem):
         self._gyroSensorActive = False
         self._blurOwned = False
         self._blurRadius = 0.0
+        self._blurLastRotation = None
         self.flightRotation = None
 
         self.tick = 0
@@ -335,6 +335,7 @@ class Main(ClientSystem):
         self.flightRotation = None
         self._dragBeforeFlight = None
         self._gyroLastTimestamp = None
+        self._blurLastRotation = None
         self.lt = [0.0, 0.0]
         self.bt = [0.0, 0.0]
         self.mouseTurnVec = [0.0, 0.0]
@@ -386,12 +387,14 @@ class Main(ClientSystem):
         # 保留当前触摸输入方案，只修复进入/退出时的基线管理。
         touchX, touchY = clientApi.GetTouchPos()
         self.lt = [touchX, touchY]
+        move = [self.mouseTurnVec[0], self.mouseTurnVec[1]]
+        self.mouseTurnVec = [0.0, 0.0]
         if self.lt != [0.0, 0.0] and self.bt != [0.0, 0.0]:
-            move = [self.lt[0] - self.bt[0], self.lt[1] - self.bt[1]]
-            if math.sqrt(move[0]**2 + move[1]**2) <= 120:
-                self.changeElytraLook(move[1]*self.linminValue, 0, move[0]*self.linminValue)
+            move[0] += self.lt[0] - self.bt[0]
+            move[1] += self.lt[1] - self.bt[1]
+        if math.sqrt(move[0]**2 + move[1]**2) <= 120:
+            self.changeElytraLook(move[1]*self.linminValue, 0, move[0]*self.linminValue)
         else:
-            self.mouseTurnVec = [0.0, 0.0]
             self.changeElytraLook(0, 0, 0)
         if self.flightRotation is not None:
             self.bt = [touchX, touchY]
@@ -456,16 +459,18 @@ class Main(ClientSystem):
         if elapsed <= 0.0 or elapsed > 0.25:
             return
 
-        screenX, screenY, screenZ = self.getScreenGyroRates(
+        screenX, _screenY, screenZ = self.getScreenGyroRates(
             float(event.get("xDiff", 0.0)),
             float(event.get("yDiff", 0.0)),
             float(event.get("zDiff", 0.0)),
             int(event.get("orientation", 0)))
-        # 角速度乘以事件间隔得到转角，再换算为摄像机控制输入。
-        scale = (self.linminValue / 1.8) * elapsed * self.TODEG / 0.45
-        gyroDelta = [-screenX * scale, -screenY * scale, -screenZ * scale]
-        gyroDelta = self.applyInvertPitch(gyroDelta, self.openYOverturn)
-        self.changeElytraLookDirectly(gyroDelta)
+        # 将设备倾斜换算成虚拟触屏拖动，交由Update与真实手指输入合并处理。
+        # 绕屏幕横轴倾斜对应纵向拖动，绕屏幕法线倾斜对应横向拖动。
+        scale = elapsed * self.TODEG / 0.45
+        dragX = self.clamp(-screenZ * scale, -24.0, 24.0)
+        dragY = self.clamp(-screenX * scale, -24.0, 24.0)
+        self.mouseTurnVec[0] = self.clamp(self.mouseTurnVec[0] + dragX, -120.0, 120.0)
+        self.mouseTurnVec[1] = self.clamp(self.mouseTurnVec[1] + dragY, -120.0, 120.0)
 
     def getScreenGyroRates(self, xRate, yRate, zRate, orientation):
         if orientation == 1:
@@ -487,6 +492,7 @@ class Main(ClientSystem):
             gameComp.SetTipMessage("当前Windows渲染器不支持动态模糊")
             return
         self.dynamicBlur = bool(enabled)
+        self._blurLastRotation = None
         if not self.dynamicBlur:
             self.disableDynamicBlur()
         if shouldSave:
@@ -499,34 +505,53 @@ class Main(ClientSystem):
         if not self.dynamicBlur:
             self.disableDynamicBlur()
             return
-        motion = self.motion_comp.GetMotion()
-        if not self.isFiniteVector(motion):
+        rotation = self.flightRotation
+        if not self.isFiniteVector(rotation):
             self.disableDynamicBlur()
             return
 
-        # GetMotion返回每帧位移，按客户端30帧换算为方块/秒。
-        speed = math.sqrt(self.dotProduct(motion, motion)) * 30.0
-        targetRadius = self.clamp((speed - 10.0) * 0.25, 0.0, 6.0)
-        self._blurRadius += (targetRadius - self._blurRadius) * 0.2
-        if abs(targetRadius - self._blurRadius) < 0.02:
+        previousRotation = self._blurLastRotation
+        self._blurLastRotation = tuple(rotation)
+        if previousRotation is None:
+            self.disableDynamicBlur()
+            return
+
+        pitchDelta = self.angleDelta(rotation[0], previousRotation[0])
+        yawDelta = self.angleDelta(rotation[1], previousRotation[1])
+        rollDelta = self.angleDelta(rotation[2], previousRotation[2])
+        turnAmount = math.sqrt(
+            pitchDelta * pitchDelta + yawDelta * yawDelta + rollDelta * rollDelta)
+        turnSpeed = turnAmount * 30.0
+        # 只由视角角速度驱动，平移不参与；最大强度限制为0.20。
+        targetRadius = self.clamp((turnSpeed - 12.0) / 240.0, 0.0, 0.20)
+        self._blurRadius += (targetRadius - self._blurRadius) * 0.25
+        if abs(targetRadius - self._blurRadius) < 0.002:
             self._blurRadius = targetRadius
-        if self._blurRadius <= 0.02 and targetRadius <= 0.0:
+        if self._blurRadius <= 0.002 and targetRadius <= 0.0:
             self.disableDynamicBlur()
             return
 
         if not self._blurOwned:
-            # 不覆盖其他组件已经开启的全局高斯模糊。
-            if self.post_process_comp.CheckGaussianBlurEnabled():
+            processOrder = self.post_process_comp.GetPostProcessOrder()
+            if not processOrder or "barrel_motion_blur" not in processOrder:
                 return
-            if not self.post_process_comp.SetEnableGaussianBlur(True):
+            if not self.post_process_comp.SetEnableByName("barrel_motion_blur", True):
                 return
             self._blurOwned = True
-        self.post_process_comp.SetGaussianBlurRadius(self._blurRadius)
+
+        normalizer = max(turnAmount, 1E-6)
+        screenX = self.clamp(yawDelta / normalizer, -1.0, 1.0)
+        screenY = self.clamp(pitchDelta / normalizer, -1.0, 1.0)
+        screenRoll = self.clamp(rollDelta / normalizer, -1.0, 1.0)
+        self.post_process_comp.SetParameter(
+            "barrel_motion_blur", "rotation",
+            [screenX, screenY, screenRoll, self._blurRadius])
 
     def disableDynamicBlur(self):
         if self._blurOwned and self.post_process_comp is not None:
-            self.post_process_comp.SetGaussianBlurRadius(0.0)
-            self.post_process_comp.SetEnableGaussianBlur(False)
+            self.post_process_comp.SetParameter(
+                "barrel_motion_blur", "rotation", [0.0, 0.0, 0.0, 0.0])
+            self.post_process_comp.SetEnableByName("barrel_motion_blur", False)
             self._blurOwned = False
         self._blurRadius = 0.0
 
@@ -612,6 +637,9 @@ class Main(ClientSystem):
         elif value > max:
             return max
         return value
+
+    def angleDelta(self, current, previous):
+        return (current - previous + 180.0) % 360.0 - 180.0
     
     def getAssumedLeft(self, yaw):
         yaw *= self.TORAD

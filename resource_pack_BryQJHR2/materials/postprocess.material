@@ -1,0 +1,21 @@
+{
+  "barrel_motion_blur_mat": {
+    "vertexShader": "shaders/barrel_motion_blur.vertex",
+    "fragmentShader": "shaders/barrel_motion_blur.fragment",
+    "vertexFields": [
+      { "field": "Position" },
+      { "field": "UV0" }
+    ],
+    "samplerStates": [
+      {
+        "samplerIndex": 0,
+        "textureWrap": "Clamp",
+        "textureFilter": "Bilinear"
+      }
+    ],
+    "states": [
+      "DisableDepthTest"
+    ],
+    "msaaSupport": "Both"
+  }
+}
