@@ -65,7 +65,7 @@ class Main(ClientSystem):
             self.strengValue = rollConfigDict["strengthValue"]
             self.openYOverturn = rollConfigDict["openYOverturn"]
             self.gyroControl = rollConfigDict.get("gyroControl", False)
-            self.dynamicBlur = rollConfigDict.get("dynamicBlur", False)
+            # self.dynamicBlur = rollConfigDict.get("dynamicBlur", False)  # 功能暂时隐藏
             if self.dynamicBlur and not self._dynamicBlurSupported:
                 self.dynamicBlur = False
                 self.saveConfig()
@@ -174,8 +174,8 @@ class Main(ClientSystem):
                     5, self.openYOverturn)
          .AddToggle("gyro_control", "陀螺仪控制（仅移动端）", self.onSettingToggleChanged,
                     6, self.gyroControl)
-         .AddToggle("dynamic_blur", "动态模糊（仅移动端）", self.onSettingToggleChanged,
-                    7, self.dynamicBlur)
+         # .AddToggle("dynamic_blur", "动态模糊（仅移动端）", self.onSettingToggleChanged,
+         #            7, self.dynamicBlur)
          .AddButton("reset_roll", "翻滚参数", "恢复默认",
                     self.onResetRollSettings, 8)
          .AddText("fly_hud_section", "飞行信息显示设置", 10)
@@ -223,8 +223,8 @@ class Main(ClientSystem):
          .SetToggleValue("invert_y", self.openYOverturn)
          .SetToggleDefault("gyro_control", self.gyroControl)
          .SetToggleValue("gyro_control", self.gyroControl)
-         .SetToggleDefault("dynamic_blur", self.dynamicBlur)
-         .SetToggleValue("dynamic_blur", self.dynamicBlur)
+         # .SetToggleDefault("dynamic_blur", self.dynamicBlur)
+         # .SetToggleValue("dynamic_blur", self.dynamicBlur)
          .SetToggleDefault("show_angle", self.angleshow)
          .SetToggleValue("show_angle", self.angleshow)
          .SetToggleDefault("show_fly_hud", self.flyHUDshow)
@@ -392,7 +392,7 @@ class Main(ClientSystem):
         if self.lt != [0.0, 0.0] and self.bt != [0.0, 0.0]:
             move[0] += self.lt[0] - self.bt[0]
             move[1] += self.lt[1] - self.bt[1]
-        if math.sqrt(move[0]**2 + move[1]**2) <= 6:
+        if math.sqrt(move[0]**2 + move[1]**2) <= 20:
             self.changeElytraLook(move[1]*self.linminValue, 0, move[0]*self.linminValue)
         else:
             self.changeElytraLook(0, 0, 0)
