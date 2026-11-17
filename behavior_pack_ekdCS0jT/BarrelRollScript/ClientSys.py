@@ -19,7 +19,11 @@ class Main(ClientSystem):
         self.camera_comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
         self.operation_comp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
         self.motion_comp = clientApi.GetEngineCompFactory().CreateActorMotion(clientApi.GetLocalPlayerId())
-        self.post_process_comp = clientApi.GetEngineCompFactory().CreatePostProcess(clientApi.GetLevelId())
+        # Windows RenderDragon无法加载旧后处理链的内置材质，启用时会在原生层断言。
+        self._dynamicBlurSupported = clientApi.GetPlatform() != 0
+        self.post_process_comp = None
+        if self._dynamicBlurSupported:
+            self.post_process_comp = clientApi.GetEngineCompFactory().CreatePostProcess(clientApi.GetLevelId())
         self.neteaseWindowComp = None
         self.settingInst = None
         self.switchPanel = None
@@ -29,8 +33,8 @@ class Main(ClientSystem):
         self._dragBeforeFlight = None
         self._gyroLastTimestamp = None
         self._gyroSensorActive = False
+        self._blurOwned = False
         self._blurRadius = 0.0
-        self._blurProcessName = None
         self.flightRotation = None
 
         self.tick = 0
@@ -62,6 +66,9 @@ class Main(ClientSystem):
             self.openYOverturn = rollConfigDict["openYOverturn"]
             self.gyroControl = rollConfigDict.get("gyroControl", False)
             self.dynamicBlur = rollConfigDict.get("dynamicBlur", False)
+            if self.dynamicBlur and not self._dynamicBlurSupported:
+                self.dynamicBlur = False
+                self.saveConfig()
         else:
             self.linminValue = 1.8
             self.strengValue = 4.0
@@ -167,7 +174,7 @@ class Main(ClientSystem):
                     5, self.openYOverturn)
          .AddToggle("gyro_control", "陀螺仪控制（仅移动端）", self.onSettingToggleChanged,
                     6, self.gyroControl)
-         .AddToggle("dynamic_blur", "动态模糊", self.onSettingToggleChanged,
+         .AddToggle("dynamic_blur", "动态模糊（仅移动端）", self.onSettingToggleChanged,
                     7, self.dynamicBlur)
          .AddButton("reset_roll", "翻滚参数", "恢复默认",
                     self.onResetRollSettings, 8)
@@ -188,6 +195,7 @@ class Main(ClientSystem):
                     17, self.HUDScreen)
          .AddButton("show_license", "开源许可", "查看说明",
                     self.onShowLicense, 20))
+        self.settingInst.SetLockSettingComp("dynamic_blur", not self._dynamicBlurSupported)
         self.syncModSettingValues()
 
     def _linminToSlider(self):
@@ -469,6 +477,15 @@ class Main(ClientSystem):
         return (xRate, yRate, zRate)
 
     def setDynamicBlurEnabled(self, enabled, shouldSave=True):
+        if enabled and not self._dynamicBlurSupported:
+            self.dynamicBlur = False
+            if self.settingInst is not None:
+                self.settingInst.SetToggleValue("dynamic_blur", False)
+            if shouldSave:
+                self.saveConfig()
+            gameComp = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId())
+            gameComp.SetTipMessage("当前Windows渲染器不支持动态模糊")
+            return
         self.dynamicBlur = bool(enabled)
         if not self.dynamicBlur:
             self.disableDynamicBlur()
@@ -476,6 +493,9 @@ class Main(ClientSystem):
             self.saveConfig()
 
     def updateDynamicBlur(self):
+        if not self._dynamicBlurSupported or self.post_process_comp is None:
+            self._blurRadius = 0.0
+            return
         if not self.dynamicBlur:
             self.disableDynamicBlur()
             return
@@ -486,9 +506,7 @@ class Main(ClientSystem):
 
         # GetMotion返回每帧位移，按客户端30帧换算为方块/秒。
         speed = math.sqrt(self.dotProduct(motion, motion)) * 30.0
-        # Windows端的内置GaussianBlur包装接口会解引用空对象，改用三个
-        # 已注册的自定义后处理档位，以缩放层数表达动态模糊强度。
-        targetRadius = self.clamp((speed - 10.0) / 7.0, 0.0, 3.0)
+        targetRadius = self.clamp((speed - 10.0) * 0.25, 0.0, 6.0)
         self._blurRadius += (targetRadius - self._blurRadius) * 0.2
         if abs(targetRadius - self._blurRadius) < 0.02:
             self._blurRadius = targetRadius
@@ -496,31 +514,20 @@ class Main(ClientSystem):
             self.disableDynamicBlur()
             return
 
-        blurLevel = self.clampInt(math.ceil(self._blurRadius), 1, 3)
-        self.setDynamicBlurLevel(blurLevel)
-
-    def setDynamicBlurLevel(self, level):
-        processNames = (
-            "barrel_motion_blur_light",
-            "barrel_motion_blur_medium",
-            "barrel_motion_blur_strong"
-        )
-        processName = processNames[self.clampInt(level, 1, 3) - 1]
-        if processName == self._blurProcessName:
-            return
-        processOrder = self.post_process_comp.GetPostProcessOrder()
-        if not processOrder or processName not in processOrder:
-            return
-        if self._blurProcessName is not None:
-            self.post_process_comp.SetEnableByName(self._blurProcessName, False)
-            self._blurProcessName = None
-        if self.post_process_comp.SetEnableByName(processName, True):
-            self._blurProcessName = processName
+        if not self._blurOwned:
+            # 不覆盖其他组件已经开启的全局高斯模糊。
+            if self.post_process_comp.CheckGaussianBlurEnabled():
+                return
+            if not self.post_process_comp.SetEnableGaussianBlur(True):
+                return
+            self._blurOwned = True
+        self.post_process_comp.SetGaussianBlurRadius(self._blurRadius)
 
     def disableDynamicBlur(self):
-        if self._blurProcessName is not None:
-            self.post_process_comp.SetEnableByName(self._blurProcessName, False)
-            self._blurProcessName = None
+        if self._blurOwned and self.post_process_comp is not None:
+            self.post_process_comp.SetGaussianBlurRadius(0.0)
+            self.post_process_comp.SetEnableGaussianBlur(False)
+            self._blurOwned = False
         self._blurRadius = 0.0
 
     def changeElytraLook(self, pitch, yaw, roll):
