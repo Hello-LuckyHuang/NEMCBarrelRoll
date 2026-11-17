@@ -5,7 +5,7 @@
   "Versions": null,
   "JavaType": 8,
   "Name": "滚筒飞行",
-  "UpdateTime": "2026-10-17T20:15:12.4340488+08:00",
+  "UpdateTime": "2026-11-17T18:11:43.8172406+08:00",
   "IconName": "",
   "Md5": null,
   "CloudMd5": null,
@@ -44,7 +44,7 @@
   "TestRandomTickSpeed": 1,
   "TestGenerateBuildings": true,
   "TestSeed": "",
-  "TestCppMapType": 1,
+  "TestCppMapType": 2,
   "TestDifficulty": 2,
   "TestCppGameMode": 1,
   "TestExperimentalHoliday": false,
@@ -54,7 +54,7 @@
   "TestStartWithMap": false,
   "TestRenderEngine": 1,
   "SelectComponents": [
-    "261d391ce50b4eddb6cbc19d63c079ad",
+    "61ebb41df13b4ae0a6ad3d244a0bf09d",
     "642ba5f7d7214681b76d8a127425b018"
   ],
   "isSlim": false,
