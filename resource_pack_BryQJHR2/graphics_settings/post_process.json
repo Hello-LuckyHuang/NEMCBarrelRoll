@@ -1,0 +1,64 @@
+{
+  "render_order": [
+    "gaussianblur"
+  ],
+  "process_array": [
+    {
+      "name": "gaussianblur",
+      "enable": false,
+      "paras": {
+        "radius": 1.0
+      },
+      "pass_array": [
+        {
+          "render_target": {
+            "width": 0.5,
+            "height": 0.5
+          },
+          "material": "dual_kawase_blur",
+          "shaderPassName": "DownScalePass"
+        },
+        {
+          "render_target": {
+            "width": 0.25,
+            "height": 0.25
+          },
+          "material": "dual_kawase_blur",
+          "shaderPassName": "DownScalePass"
+        },
+        {
+          "render_target": {
+            "width": 0.125,
+            "height": 0.125
+          },
+          "material": "dual_kawase_blur",
+          "shaderPassName": "DownScalePass"
+        },
+        {
+          "render_target": {
+            "width": 0.25,
+            "height": 0.25
+          },
+          "material": "dual_kawase_blur",
+          "shaderPassName": "UpScalePass"
+        },
+        {
+          "render_target": {
+            "width": 0.5,
+            "height": 0.5
+          },
+          "material": "dual_kawase_blur",
+          "shaderPassName": "UpScalePass"
+        },
+        {
+          "render_target": {
+            "width": 1.0,
+            "height": 1.0
+          },
+          "material": "dual_kawase_blur",
+          "shaderPassName": "UpScalePass"
+        }
+      ]
+    }
+  ]
+}

@@ -19,11 +19,7 @@ class Main(ClientSystem):
         self.camera_comp = clientApi.GetEngineCompFactory().CreateCamera(clientApi.GetLevelId())
         self.operation_comp = clientApi.GetEngineCompFactory().CreateOperation(clientApi.GetLevelId())
         self.motion_comp = clientApi.GetEngineCompFactory().CreateActorMotion(clientApi.GetLocalPlayerId())
-        # Windows RenderDragon无法加载旧后处理链的内置材质，启用时会在原生层断言。
-        self._dynamicBlurSupported = clientApi.GetPlatform() != 0
-        self.post_process_comp = None
-        if self._dynamicBlurSupported:
-            self.post_process_comp = clientApi.GetEngineCompFactory().CreatePostProcess(clientApi.GetLevelId())
+        self.post_process_comp = clientApi.GetEngineCompFactory().CreatePostProcess(clientApi.GetLevelId())
         self.neteaseWindowComp = None
         self.settingInst = None
         self.switchPanel = None
@@ -66,9 +62,6 @@ class Main(ClientSystem):
             self.openYOverturn = rollConfigDict["openYOverturn"]
             self.gyroControl = rollConfigDict.get("gyroControl", False)
             self.dynamicBlur = rollConfigDict.get("dynamicBlur", False)
-            if self.dynamicBlur and not self._dynamicBlurSupported:
-                self.dynamicBlur = False
-                self.saveConfig()
         else:
             self.linminValue = 1.8
             self.strengValue = 4.0
@@ -174,7 +167,7 @@ class Main(ClientSystem):
                     5, self.openYOverturn)
          .AddToggle("gyro_control", "陀螺仪控制（仅移动端）", self.onSettingToggleChanged,
                     6, self.gyroControl)
-         .AddToggle("dynamic_blur", "动态模糊（仅移动端）", self.onSettingToggleChanged,
+         .AddToggle("dynamic_blur", "动态模糊", self.onSettingToggleChanged,
                     7, self.dynamicBlur)
          .AddButton("reset_roll", "翻滚参数", "恢复默认",
                     self.onResetRollSettings, 8)
@@ -195,7 +188,6 @@ class Main(ClientSystem):
                     17, self.HUDScreen)
          .AddButton("show_license", "开源许可", "查看说明",
                     self.onShowLicense, 20))
-        self.settingInst.SetLockSettingComp("dynamic_blur", not self._dynamicBlurSupported)
         self.syncModSettingValues()
 
     def _linminToSlider(self):
@@ -477,15 +469,6 @@ class Main(ClientSystem):
         return (xRate, yRate, zRate)
 
     def setDynamicBlurEnabled(self, enabled, shouldSave=True):
-        if enabled and not self._dynamicBlurSupported:
-            self.dynamicBlur = False
-            if self.settingInst is not None:
-                self.settingInst.SetToggleValue("dynamic_blur", False)
-            if shouldSave:
-                self.saveConfig()
-            gameComp = clientApi.GetEngineCompFactory().CreateGame(clientApi.GetLevelId())
-            gameComp.SetTipMessage("当前Windows渲染器不支持动态模糊")
-            return
         self.dynamicBlur = bool(enabled)
         if not self.dynamicBlur:
             self.disableDynamicBlur()
@@ -493,9 +476,6 @@ class Main(ClientSystem):
             self.saveConfig()
 
     def updateDynamicBlur(self):
-        if not self._dynamicBlurSupported or self.post_process_comp is None:
-            self._blurRadius = 0.0
-            return
         if not self.dynamicBlur:
             self.disableDynamicBlur()
             return
@@ -524,7 +504,7 @@ class Main(ClientSystem):
         self.post_process_comp.SetGaussianBlurRadius(self._blurRadius)
 
     def disableDynamicBlur(self):
-        if self._blurOwned and self.post_process_comp is not None:
+        if self._blurOwned:
             self.post_process_comp.SetGaussianBlurRadius(0.0)
             self.post_process_comp.SetEnableGaussianBlur(False)
             self._blurOwned = False
